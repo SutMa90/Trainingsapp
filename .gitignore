@@ -1,0 +1,63 @@
+# ---------------------------------------------------------------
+# Persönliche Trainingsdaten – NIE ins Repository
+# (das GitHub-Repository ist öffentlich)
+# ---------------------------------------------------------------
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+*.db
+*.sqlite
+*.sqlite3
+# Startdatenbank, die das Umwandlungsskript erzeugt
+app/assets/db/
+# Prüfberichte des Umwandlungsskripts (enthalten Trainingsdaten)
+tools/import_excel/out/
+
+# ---------------------------------------------------------------
+# Flutter / Dart
+# ---------------------------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+*.g.dart.tmp
+pubspec_overrides.yaml
+
+# Android
+**/android/.gradle/
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/key.properties
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+*.jks
+*.keystore
+*.iml
+GeneratedPluginRegistrant.java
+
+# Symbolisierungs-/Obfuskationsdateien
+app.*.symbols
+app.*.map.json
+
+# ---------------------------------------------------------------
+# Editoren / Betriebssystem
+# ---------------------------------------------------------------
+.idea/
+*.ipr
+*.iws
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+*.swp
+~$*
