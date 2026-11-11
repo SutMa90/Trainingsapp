@@ -5,6 +5,8 @@
 *.xlsx
 *.xls
 *.xlsm
+# Ausnahme: synthetische Testdaten (erfunden, siehe testdaten/ERWARTET.md)
+!testdaten/Testlog.xlsx
 *.csv
 *.db
 *.sqlite
