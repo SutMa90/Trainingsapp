@@ -8,8 +8,9 @@ Zweck: Das Umwandlungsskript (WP1.4) wird automatisch gegen diese Datei getestet
 ## Annahmen (Entscheidungsdatei für die Testdaten)
 - **X4 / X4.1** (Südstadt): zusammenführen zu **X4**, Vorgabe-Einheit lbs.
 - **X5 / X5.1** (Südstadt): ebenfalls zusammenführen zu **X5**, Vorgabe-Einheit lbs, obwohl der Hersteller verschieden ist (wie bei den echten Daten A5/A5.1, Entscheid 12.11.2026). Notiz von X5 erhält „zusammengeführt mit X5.1 – Gamma, kg“.
-- **Session 2025-03-18 Südstadt**: Zeilen mit Verdacht „lbs × 0,45 als kg erfasst“ werden als lbs-Eingabe wiederhergestellt.
-- Ohne diese Entscheidungen meldet das Skript die Fälle nur und ändert nichts.
+- **Trainingsdaten werden nie verändert** (Entscheid 12.11.2026): Eingabewert und Eingabeeinheit kommen 1:1 aus der Excel. Verdachtsfälle (z. B. Session 2025-03-18 „lbs × 0,45 als kg erfasst“) werden nur als Warnung gemeldet.
+- **Muskelgruppen:** Zuordnung über die Funktion; `Nordstadt/T1` (ohne Funktion) per Entscheid → Trizeps; `Südstadt/C3` hat eine Funktion ohne Zuordnung → bleibt leer, Warnung.
+- Datei: `testdaten/entscheidungen.json`.
 
 ## Gesamtzahlen
 
@@ -51,10 +52,11 @@ Zweck: Das Umwandlungsskript (WP1.4) wird automatisch gegen diese Datei getestet
 |---|---|---|
 | 12 | kg-Spalte gerundet (90,7 statt 90,72) | kg neu berechnet: 200 × 0,4536 = 90,72 |
 | 26–27 | D1 Nordstadt (kg-Gerät) einmalig in lbs | übernommen wie erfasst: 50 lbs / 60 lbs |
-| 32–35 | Südstadt, lbs-Geräte als kg erfasst, Werte = lbs × 0,45 | mit Entscheidung: 190 lbs, 200 lbs, 60 lbs, 70 lbs → kg = lbs × 0,4536 |
+| 32–35 | Südstadt, lbs-Geräte als kg erfasst, Werte = lbs × 0,45 | übernommen wie erfasst (85,5 / 90 / 27 / 31,5 kg), Warnung mit Hinweis auf Faktor 0,45 |
 | 53 | D1 Nordstadt: Satz-Nr. springt von 1 auf 3 | importiert als Satz 2 |
-| – | Doppel-Kürzel-Kandidaten X4/X4.1 und X5/X5.1 | gemäss Entscheidungsdatei |
-| – | T1 Nordstadt ohne Funktion | Muskelgruppe bleibt leer |
+| – | C3 Südstadt: Funktion „Cable Row einarmig“ ohne Zuordnung | Muskelgruppe bleibt leer |
+
+Insgesamt **8 Warnungen** (Zeilen 26, 27, 32, 33, 34, 35, 53 und C3). Zusätzliche Hinweise: Zusammenführung X4/X4.1 und X5/X5.1, Rundung Zeile 12, T1 assistiert, C3 links/rechts.
 
 ## Stichproben (Satz für Satz)
 
@@ -67,7 +69,7 @@ S2: 30 kg, 32,5 kg · S4: 32,5 kg, 35 kg · S5: 65 lbs (29,48 kg), 70 lbs (31,75
 **X5 Südstadt (zusammengeführt):** 4 Sätze an einem Gerät:
 S2: 35 kg, 35 kg · S5: 70 lbs (31,75 kg), 75 lbs (34,02 kg). Ein Gerät X5.1 existiert nach dem Import nicht mehr.
 
-**S4 Südstadt (nach Entscheidung):** A2 190 lbs (86,18 kg) und 200 lbs (90,72 kg); E1 60 lbs (27,22 kg); E2 70 lbs (31,75 kg); X4 32,5 kg und 35 kg.
+**S4 Südstadt (unverändert):** A2 85,5 kg und 90 kg; E1 27 kg; E2 31,5 kg; X4 32,5 kg und 35 kg.
 
 **S3 – B4 Nordstadt:** 2 Sätze à 35 kg, Notiz „inkl. 5 kg Zusatzgewicht (Anzeige 30 kg)“ bleibt erhalten.
 

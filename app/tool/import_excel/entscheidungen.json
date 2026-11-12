@@ -1,0 +1,40 @@
+{
+  "_hinweis": "Entscheidungen des Nutzers für die echte Trainings-Excel (WP1.3, 12.11.2026). Enthält keine Trainingswerte. Trainingsdaten werden nicht verändert, Auffälliges nur gemeldet.",
+  "zusammenfuehren": [
+    { "standort": "Grüze", "basis": "A4", "zusatz": "A4.1" },
+    { "standort": "Grüze", "basis": "A5", "zusatz": "A5.1" }
+  ],
+  "muskelgruppeNachFunktion": {
+    "Leg Press": "Beine",
+    "Leg Extension": "Beine",
+    "Leg Curl": "Beine",
+    "Seated Leg Curl": "Beine",
+    "Calf Press": "Waden",
+    "Hip Abduction": "Gesäss/Hüfte",
+    "Hip Adduction": "Gesäss/Hüfte",
+    "Pec Fly": "Brust",
+    "Fly": "Brust",
+    "Chest Press": "Brust",
+    "Vertical Chest": "Brust",
+    "Row": "Rücken",
+    "Mid Row": "Rücken",
+    "Pulldown": "Rücken",
+    "Lat Machine": "Rücken",
+    "Lower Back": "Rücken",
+    "Rear Delt": "Schultern",
+    "Shoulder Press": "Schultern",
+    "Overhead Press": "Schultern",
+    "Abdominal": "Core"
+  },
+  "muskelgruppeOhneFunktion": {
+    "Grüze/B3": "Rücken",
+    "Grüze/C1": "Core"
+  },
+  "stichproben": [
+    "2026-08-03 Dielsdorf",
+    "2026-08-06 Grüze",
+    "2026-08-18 Grüze",
+    "2026-08-25 Grüze",
+    "2026-11-11 Dielsdorf"
+  ]
+}

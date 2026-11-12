@@ -1,0 +1,27 @@
+{
+  "_hinweis": "Entscheidungsdatei für die synthetischen Testdaten (Testlog.xlsx). Gleicher Aufbau wie app/tool/import_excel/entscheidungen.json für die echten Daten.",
+  "zusammenfuehren": [
+    { "standort": "Südstadt", "basis": "X4", "zusatz": "X4.1" },
+    { "standort": "Südstadt", "basis": "X5", "zusatz": "X5.1" }
+  ],
+  "muskelgruppeNachFunktion": {
+    "Leg Press": "Beine",
+    "Leg Extension": "Beine",
+    "Seated Leg Curl": "Beine",
+    "Chest Press": "Brust",
+    "Row": "Rücken",
+    "Abdominal": "Core",
+    "Hip Abduction": "Gesäss/Hüfte",
+    "Hip Adduction": "Gesäss/Hüfte"
+  },
+  "muskelgruppeOhneFunktion": {
+    "Nordstadt/T1": "Trizeps"
+  },
+  "stichproben": [
+    "2025-03-03 Nordstadt",
+    "2025-03-06 Südstadt",
+    "2025-03-18 Südstadt",
+    "2025-03-25 Südstadt",
+    "2025-04-02 Nordstadt"
+  ]
+}

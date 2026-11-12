@@ -14,7 +14,7 @@
 # Startdatenbank, die das Umwandlungsskript erzeugt
 app/assets/db/
 # Prüfberichte des Umwandlungsskripts (enthalten Trainingsdaten)
-tools/import_excel/out/
+app/tool/import_excel/out/
 
 # ---------------------------------------------------------------
 # Flutter / Dart

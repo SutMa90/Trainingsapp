@@ -28,3 +28,5 @@ Sammelstelle für alle Ideen außerhalb des aktuellen Umfangs. Nichts geht verlo
 | I-17 | Cardio-Erfassung inkl. Start-/Endzeit von Session bzw. Einheit | soll | neu | | aus Datenmodell R1.4, 11.11. |
 | I-18 | Stepper mit Schrittweite pro Gerät (z. B. 2,5 kg / 5 lbs) | Spielerei | neu | | V1: Zahlenfelder, 11.11. |
 | I-14 | Plausibilitätscheck: gleiche Kürzel an beiden Standorten = gleiche Muskelgruppe? | Spielerei | neu | | |
+| I-19 | Datenpflege nach dem Import in der Geräteverwaltung: Muskelgruppe T1/T2 (Dielsdorf) und C3 (Grüze) nachtragen, Vorgabe-Einheit D1 Dielsdorf prüfen (Tab Geräte: lbs, erfasst meist kg), Funktion B3/C1 Grüze ergänzen | soll | neu | M2 | aus M1/WP1.3, 12.11.: Import übernimmt Daten unverändert |
+| I-20 | Hinweis bei der Erfassung, wenn die Einheit von der Vorgabe des Geräts abweicht (z. B. „sonst immer kg – wirklich lbs?“) | Spielerei | neu | | aus M1/WP1.4, 12.11.: 18.08./22.08. zeigen solche Verwechslungen |
