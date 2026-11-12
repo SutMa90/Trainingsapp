@@ -1,6 +1,6 @@
 # WP1.2 – Flutter-Grundgerüst und Datenbank
 
-Stand: 12.11.2026 · Status: gebaut, Test auf dem Handy ausstehend
+Stand: 12.11.2026 · Status: ✅ abgenommen
 
 **Abnahmekriterium:** App startet auf dem Handy; automatischer Test schreibt in alle 5 Tabellen und liest zurück; 9 Start-Muskelgruppen vorhanden.
 
@@ -33,4 +33,4 @@ Stand: 12.11.2026 · Status: gebaut, Test auf dem Handy ausstehend
 - `flutter test`: 5 von 5 Tests grün (alle Tabellen, Eindeutigkeit Standort + Kürzel, Fremdschlüssel, Umrechnung, 9 Muskelgruppen).
 - `flutter analyze`: keine Befunde.
 - Android-Debug-Build erfolgreich.
-- Offen: Start auf dem Handy (Abnahme durch Nutzer).
+- Handy (Samsung, Android): App installiert und gestartet, zeigt „Noch keine Sessions. Die Datenbank ist bereit.“; Datenbankdatei vom Handy enthält die 9 Start-Muskelgruppen.
