@@ -27,6 +27,10 @@ Keine Start-/Endzeit in V1 (→ Backlog I-17, relevant mit Cardio).
 **R2.1 Doppel-Kürzel wegen Einheit zusammenlegen** – A4/A4.1, A5/A5.1 usw. werden beim Import zu einem Gerät zusammengeführt; jeder Satz behält seine Original-Einheit.
 - Umsetzung: **kg/lbs-Schalter direkt im Erfassungsbildschirm**. Umschalten gilt für den aktuellen Satz und wird als neue Vorgabe ins Gerät übernommen.
 - Offen für M1: Die genaue Liste der Paare wird beim Import aus den Daten erstellt und vom Nutzer bestätigt.
+- **[Änderung M1] Liste bestätigt (12.11.2026):** In den Daten gibt es genau zwei Paare, beide in Grüze:
+  - **A4 + A4.1 → A4** (Leg Extension)
+  - **A5 + A5.1 → A5** (Seated Leg Curl), obwohl die Hersteller verschieden sind (Cybex lbs / LifeFitness kg) – bewusst so entschieden, der kg/lbs-Schalter deckt die Einheit ab.
+  - Regel: Kürzel, Hersteller, Modell und Vorgabe-Einheit kommen vom Basis-Kürzel (ohne „.1“). Abweichende Angaben des „.1“-Geräts werden in die Geräte-Notiz übernommen (z. B. „zusammengeführt mit A5.1 – LifeFitness, kg“).
 
 **R2.2 Ein Gerät, mehrere Übungen** – Jedes Kürzel bleibt ein eigenes Gerät. **Keine** Verknüpfung „gleiches physisches Gerät“, auch nicht später.
 - Stattdessen: Beim Anlegen eines Geräts **Vorschläge aus bestehenden Einträgen** für Hersteller (danach Modell zu diesem Hersteller).

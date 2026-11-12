@@ -7,7 +7,7 @@ Zweck: Das Umwandlungsskript (WP1.4) wird automatisch gegen diese Datei getestet
 
 ## Annahmen (Entscheidungsdatei für die Testdaten)
 - **X4 / X4.1** (Südstadt): zusammenführen zu **X4**, Vorgabe-Einheit lbs.
-- **X5 / X5.1** (Südstadt): **nicht** zusammenführen (anderer Hersteller).
+- **X5 / X5.1** (Südstadt): ebenfalls zusammenführen zu **X5**, Vorgabe-Einheit lbs, obwohl der Hersteller verschieden ist (wie bei den echten Daten A5/A5.1, Entscheid 12.11.2026). Notiz von X5 erhält „zusammengeführt mit X5.1 – Gamma, kg“.
 - **Session 2025-03-18 Südstadt**: Zeilen mit Verdacht „lbs × 0,45 als kg erfasst“ werden als lbs-Eingabe wiederhergestellt.
 - Ohne diese Entscheidungen meldet das Skript die Fälle nur und ändert nichts.
 
@@ -21,7 +21,7 @@ Zweck: Das Umwandlungsskript (WP1.4) wird automatisch gegen diese Datei getestet
 | **Importierte Sätze** | **48** |
 | Sessions | 6 |
 | Standorte | 2 (Nordstadt, Südstadt) |
-| Geräte nach Zusammenführung | 14 (Nordstadt 7, Südstadt 7; Tab Geräte hat 15 Zeilen) |
+| Geräte nach Zusammenführung | 13 (Nordstadt 7, Südstadt 6; Tab Geräte hat 15 Zeilen) |
 | Muskelgruppen | 9 Startwerte gemäss R2.4 |
 
 ## Sessions
@@ -64,7 +64,8 @@ Zweck: Das Umwandlungsskript (WP1.4) wird automatisch gegen diese Datei getestet
 
 **X4 Südstadt (zusammengeführt):** 6 Sätze an einem Gerät:
 S2: 30 kg, 32,5 kg · S4: 32,5 kg, 35 kg · S5: 65 lbs (29,48 kg), 70 lbs (31,75 kg).
-X5 hat 2 Sätze (lbs), X5.1 hat 2 Sätze (kg).
+**X5 Südstadt (zusammengeführt):** 4 Sätze an einem Gerät:
+S2: 35 kg, 35 kg · S5: 70 lbs (31,75 kg), 75 lbs (34,02 kg). Ein Gerät X5.1 existiert nach dem Import nicht mehr.
 
 **S4 Südstadt (nach Entscheidung):** A2 190 lbs (86,18 kg) und 200 lbs (90,72 kg); E1 60 lbs (27,22 kg); E2 70 lbs (31,75 kg); X4 32,5 kg und 35 kg.
 
