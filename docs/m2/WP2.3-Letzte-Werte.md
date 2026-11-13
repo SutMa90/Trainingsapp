@@ -1,6 +1,6 @@
 # WP2.3 – Letzte Werte beim Gerät (F7) und „wie letztes Mal“
 
-Stand: 13.11.2026 · Status: umgesetzt (0.2.4), Test am Handy offen
+Stand: 13.11.2026 · Status: ✅ abgenommen (0.2.4)
 
 **Abnahmekriterium:** Mit Testdaten zeigt ein Gerät die letzte Session am Standort und die letzte überhaupt, beide „xx kg, yy lbs“; „wie letztes Mal“ übernimmt die Sätze der letzten Session.
 
@@ -32,4 +32,4 @@ Keine Änderung am Datenmodell.
 
 ## Ergebnis
 - `flutter test`: 50 von 50 grün (Zeitlimit pro Test). `flutter analyze`: keine Befunde. Android-Debug-Build erfolgreich.
-- Handy: offen.
+- Handy 0.2.4 (13.11.): letzte Werte, „wie letztes Mal“ + Rückgängig, Vorbefüllung pro Satz-Nr. und festes ✕ geprüft – Nutzer: „alles gut“. ✅
