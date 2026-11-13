@@ -80,3 +80,4 @@ Details: `docs/M1.md` und `docs/m1/`.
 - Bis M2 abgenommen ist, bleibt die Excel die Referenz; neue Sessions bis dahin weiter wie bisher erfassen und vor M2 neu importieren (Skript erneut laufen lassen).
 - Android-Lizenzen auf dem PC noch nicht akzeptiert (`flutter doctor --android-licenses`) – stört den Build bisher nicht.
 - App läuft als Debug-Version; eine signierte Release-Version ist für V1 noch zu klären (spätestens M4).
+- **[Änderung nach M1, 13.11.2026] Neuer Nutzerwunsch für M2:** In der App erfasste Sessions sollen bis auf Weiteres zurück in die Excel auf dem PC übertragen werden (Datensicherung) → Backlog I-21. Weg und Format werden in M2 vorgeschlagen und freigegeben.
