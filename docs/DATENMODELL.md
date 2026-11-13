@@ -13,6 +13,12 @@ Strukturelle Entscheidung → Änderungen nur nach Abstimmung, geänderte Abschn
 
 **R1.4 Session** – Datum, Standort, Körpergewicht des Tages (für assistierte Geräte).
 Keine Start-/Endzeit in V1 (→ Backlog I-17, relevant mit Cardio).
+- **[Änderung M2] Feld „abgeschlossen“ (ja/nein)** (13.11.2026, Datenbank-Version 2): Importierte Sessions gelten als abgeschlossen. Regeln:
+  - Eine Session wird **bewusst beendet** (Knopf „Session beenden“). Versehentlich beendet → am selben Tag **wieder aufnehmen**.
+  - **Keine Session über mehrere Tage:** Läuft eine Session beim Tageswechsel noch, endet sie automatisch (Datum = Starttag).
+  - **Eine Session pro Tag und Standort:** Erneuter Start am selben Tag und Ort führt die bestehende Session weiter.
+  - Eine Session **ohne Sätze** wird beim Beenden verworfen.
+  - Die Rückübertragung (I-21) überträgt nur abgeschlossene Sessions.
 
 **R1.5 Satz** – Session, Gerät, Satz-Nr., Seite (L/R/leer), Wiederholungen, Eingabewert + Eingabeeinheit (Original), Gewicht kg (berechnet), Notiz. Kein RPE in V1.
 

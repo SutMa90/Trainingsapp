@@ -1,24 +1,63 @@
 import 'package:flutter/material.dart';
 
 import '../data/db/datenbank.dart';
+import '../data/db/session_logik.dart';
 import 'format.dart';
+import 'laufende_session.dart';
 
 /// Schreibgeschützte Liste der Sätze einer Session (M1, Variante a).
 /// Reihenfolge = Erfassungsreihenfolge (wie in der Excel).
+/// [Änderung M2] Eine heute beendete Session lässt sich hier wieder aufnehmen.
 class SessionDetails extends StatelessWidget {
-  const SessionDetails({super.key, required this.db, required this.uebersicht});
+  const SessionDetails({
+    super.key,
+    required this.db,
+    required this.uebersicht,
+    this.jetzt = DateTime.now,
+  });
 
   final Datenbank db;
   final SessionUebersicht uebersicht;
+  final DateTime Function() jetzt;
+
+  Future<void> _wiederAufnehmen(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await db.nimmSessionWiederAuf(
+          uebersicht.session.id, isoDatum(jetzt()));
+      navigator.pushReplacement(MaterialPageRoute(
+        builder: (_) => LaufendeSessionSeite(
+            db: db, sessionId: uebersicht.session.id, jetzt: jetzt),
+      ));
+    } on StateError catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final s = uebersicht.session;
     final kw = s.koerpergewichtKg;
+    final vonHeute = s.datum == isoDatum(jetzt());
     return Scaffold(
       appBar: AppBar(
         title: Text('${formatDatum(s.datum)} · ${uebersicht.standort.name}'),
       ),
+      bottomNavigationBar: vonHeute && s.abgeschlossen
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: OutlinedButton.icon(
+                  onPressed: () => _wiederAufnehmen(context),
+                  icon: const Icon(Icons.replay),
+                  label: const Text('Session wieder aufnehmen'),
+                  style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52)),
+                ),
+              ),
+            )
+          : null,
       body: StreamBuilder<List<SatzMitGeraet>>(
         stream: db.beobachteSaetzeDerSession(s.id),
         builder: (context, snap) {
@@ -43,7 +82,7 @@ class SessionDetails extends StatelessWidget {
                   ),
                 );
               }
-              return _SatzZeile(eintrag: saetze[i - 1]);
+              return SatzZeile(eintrag: saetze[i - 1]);
             },
           );
         },
@@ -52,8 +91,8 @@ class SessionDetails extends StatelessWidget {
   }
 }
 
-class _SatzZeile extends StatelessWidget {
-  const _SatzZeile({required this.eintrag});
+class SatzZeile extends StatelessWidget {
+  const SatzZeile({super.key, required this.eintrag});
 
   final SatzMitGeraet eintrag;
 

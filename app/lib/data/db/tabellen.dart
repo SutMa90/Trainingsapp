@@ -61,6 +61,11 @@ class Sessions extends Table {
   TextColumn get datum => text().withLength(min: 10, max: 10)();
   IntColumn get standortId => integer().references(Standorte, #id)();
   RealColumn get koerpergewichtKg => real().nullable()();
+
+  /// [Änderung M2] Datenbank-Version 2: Session bewusst beendet (ja/nein).
+  /// Importierte Sessions gelten als abgeschlossen (Vorgabe ja); die App legt
+  /// neue Sessions ausdrücklich mit „nein“ an. Regeln: DATENMODELL R1.4.
+  BoolColumn get abgeschlossen => boolean().withDefault(const Constant(true))();
 }
 
 /// R1.5 / R2.7 Satz.

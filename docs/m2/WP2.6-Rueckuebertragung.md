@@ -13,8 +13,9 @@ Stand: 13.11.2026 · Status: Weg und Format freigegeben, Umsetzung offen
 | 1 | Weg | **A: USB-Kabel + Doppelklick am PC** (`Rueckuebertragung.bat`). Weg B (in der App „Sicherung teilen“) → Backlog I-22. |
 | 2 | Format | wie bisher (siehe unten), inkl. Auto-Notizen; neue Geräte werden im Tab Geräte angehängt |
 | 3 | Lücken | **keine Lücken**: die vorbereiteten leeren Zeilen am Ende des Logs (nur Volumen-Formel, keine Daten) werden mit den neuen Sätzen gefüllt; danach wird angehängt |
-| 4 | Benennung der Sicherungen | Datum der **letzten Trainings-Session** im Dateinamen (Nutzervorschlag) – Details siehe Fragenrunde 2 |
-| 5 | Prio | offen (Fragenrunde 2) |
+| 4 | Benennung der Sicherungen | Datum der **letzten Trainings-Session** im Dateinamen (Nutzervorschlag): `Sicherungen/Krafttraining_Log_Stand_JJJJ-MM-TT.xlsx` = letzte Session, die *vor* dem Schreiben in der Excel stand; `Sicherungen/App-Datenbank_Stand_JJJJ-MM-TT.sqlite` = letzte Session in der App. Gibt es den Namen schon, wird `_2`, `_3` … angehängt – nie überschrieben. |
+| 5 | Prio | **soll** (Nutzer, 13.11.2026) |
+| 6 | Welche Sessions | nur **beendete** Sessions (siehe `DATENMODELL.md` R1.4 [Änderung M2]); eine laufende Session wird im Bericht als „läuft noch“ gemeldet |
 
 ## Ablauf (Weg A)
 1. Handy per USB verbunden und entsperrt; am PC `Rueckuebertragung.bat` doppelklicken.
@@ -32,6 +33,7 @@ Datum (Text `JJJJ-MM-TT`), Ort, Gerät (Kürzel; bei links/rechts `C3-links` / `
 ## Erkennung bereits übertragener Sessions
 - Eine Session gilt als übertragen, wenn das Log schon Zeilen mit **gleichem Datum + Ort** hat. Die Excel ist selbst der Nachweis; in der App wird nichts vermerkt.
 - Weicht eine bereits übertragene Session ab (z. B. nachträglich in der App korrigiert), wird **nichts geschrieben**, nur im Bericht gemeldet.
+- Bekannte Grenze: Wird eine Session nach der Rückübertragung am selben Tag wieder aufgenommen und ergänzt, fehlen die neuen Sätze in der Excel; der Bericht meldet die Session als abweichend.
 
 ## Kleinere technische Entscheide (Vorschlag)
 - Nur die neuen Zeilen werden in die Datei geschrieben; alles andere bleibt Byte für Byte gleich (automatischer Test prüft das).

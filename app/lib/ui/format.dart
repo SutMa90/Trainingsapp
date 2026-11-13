@@ -17,3 +17,10 @@ String formatZahl(double wert, {int stellen = 2}) {
   }
   return s.replaceAll('.', ',');
 }
+
+/// Liest eine Zahl mit Komma oder Punkt (`80,5` / `80.5`); leer → null.
+double? leseZahl(String text) {
+  final t = text.trim().replaceAll(',', '.');
+  if (t.isEmpty) return null;
+  return double.tryParse(t);
+}

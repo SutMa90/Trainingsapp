@@ -7,7 +7,7 @@ Stand: 13.11.2026 · Status: **M0 und M1 abgeschlossen – M2 (Erfassung) läuft
 - **Werkzeuge:** Claude Code für Code, Build und Git; Cowork für Doku und Konzept.
 - **Führende Quelle:** Sobald das Repository steht, wandern ROADMAP und Backlog nach `docs/` im Repository. Der Ordner bleibt nur Arbeitskopie.
 - **Keine KI** bis auf Weiteres; Auswertungen regelbasiert, als Text **und** Grafik.
-- **[Änderung M2] Versionierung bis V1:** `0.x` – jede Testinstallation bekommt eine neue Versionsnummer; `1.0.0` = Version 1 fertig (Nutzerwunsch 13.11.2026).
+- **[Änderung M2] Versionierung bis V1:** `0.<Meilenstein>.<Testinstallation>` (z. B. `0.2.1`) – jede Testinstallation bekommt eine neue Nummer, sichtbar in der App; `1.0.0` = Version 1 fertig (Nutzerwunsch 13.11.2026).
 Grundlage: `Trainings-App_Logikzusammenfassung.md`
 Ideen außerhalb von V1: siehe `IDEEN-BACKLOG.md`
 

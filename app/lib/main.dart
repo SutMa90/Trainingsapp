@@ -11,9 +11,12 @@ void main() {
 }
 
 class TrainingsApp extends StatelessWidget {
-  const TrainingsApp({super.key, required this.db});
+  const TrainingsApp({super.key, required this.db, this.jetzt = DateTime.now});
 
   final Datenbank db;
+
+  /// Uhr der App (in Tests ersetzbar, z. B. für den Tageswechsel).
+  final DateTime Function() jetzt;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +32,7 @@ class TrainingsApp extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
-      home: SessionListe(db: db),
+      home: SessionListe(db: db, jetzt: jetzt),
     );
   }
 }

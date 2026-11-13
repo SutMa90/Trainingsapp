@@ -1349,12 +1349,28 @@ class $SessionsTable extends Sessions
     type: DriftSqlType.double,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _abgeschlossenMeta = const VerificationMeta(
+    'abgeschlossen',
+  );
+  @override
+  late final GeneratedColumn<bool> abgeschlossen = GeneratedColumn<bool>(
+    'abgeschlossen',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("abgeschlossen" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     datum,
     standortId,
     koerpergewichtKg,
+    abgeschlossen,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1396,6 +1412,15 @@ class $SessionsTable extends Sessions
         ),
       );
     }
+    if (data.containsKey('abgeschlossen')) {
+      context.handle(
+        _abgeschlossenMeta,
+        abgeschlossen.isAcceptableOrUnknown(
+          data['abgeschlossen']!,
+          _abgeschlossenMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1421,6 +1446,10 @@ class $SessionsTable extends Sessions
         DriftSqlType.double,
         data['${effectivePrefix}koerpergewicht_kg'],
       ),
+      abgeschlossen: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}abgeschlossen'],
+      )!,
     );
   }
 
@@ -1438,11 +1467,17 @@ class TrainingsSession extends DataClass
   final String datum;
   final int standortId;
   final double? koerpergewichtKg;
+
+  /// [Änderung M2] Datenbank-Version 2: Session bewusst beendet (ja/nein).
+  /// Importierte Sessions gelten als abgeschlossen (Vorgabe ja); die App legt
+  /// neue Sessions ausdrücklich mit „nein“ an. Regeln: DATENMODELL R1.4.
+  final bool abgeschlossen;
   const TrainingsSession({
     required this.id,
     required this.datum,
     required this.standortId,
     this.koerpergewichtKg,
+    required this.abgeschlossen,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1453,6 +1488,7 @@ class TrainingsSession extends DataClass
     if (!nullToAbsent || koerpergewichtKg != null) {
       map['koerpergewicht_kg'] = Variable<double>(koerpergewichtKg);
     }
+    map['abgeschlossen'] = Variable<bool>(abgeschlossen);
     return map;
   }
 
@@ -1464,6 +1500,7 @@ class TrainingsSession extends DataClass
       koerpergewichtKg: koerpergewichtKg == null && nullToAbsent
           ? const Value.absent()
           : Value(koerpergewichtKg),
+      abgeschlossen: Value(abgeschlossen),
     );
   }
 
@@ -1477,6 +1514,7 @@ class TrainingsSession extends DataClass
       datum: serializer.fromJson<String>(json['datum']),
       standortId: serializer.fromJson<int>(json['standortId']),
       koerpergewichtKg: serializer.fromJson<double?>(json['koerpergewichtKg']),
+      abgeschlossen: serializer.fromJson<bool>(json['abgeschlossen']),
     );
   }
   @override
@@ -1487,6 +1525,7 @@ class TrainingsSession extends DataClass
       'datum': serializer.toJson<String>(datum),
       'standortId': serializer.toJson<int>(standortId),
       'koerpergewichtKg': serializer.toJson<double?>(koerpergewichtKg),
+      'abgeschlossen': serializer.toJson<bool>(abgeschlossen),
     };
   }
 
@@ -1495,6 +1534,7 @@ class TrainingsSession extends DataClass
     String? datum,
     int? standortId,
     Value<double?> koerpergewichtKg = const Value.absent(),
+    bool? abgeschlossen,
   }) => TrainingsSession(
     id: id ?? this.id,
     datum: datum ?? this.datum,
@@ -1502,6 +1542,7 @@ class TrainingsSession extends DataClass
     koerpergewichtKg: koerpergewichtKg.present
         ? koerpergewichtKg.value
         : this.koerpergewichtKg,
+    abgeschlossen: abgeschlossen ?? this.abgeschlossen,
   );
   TrainingsSession copyWithCompanion(SessionsCompanion data) {
     return TrainingsSession(
@@ -1513,6 +1554,9 @@ class TrainingsSession extends DataClass
       koerpergewichtKg: data.koerpergewichtKg.present
           ? data.koerpergewichtKg.value
           : this.koerpergewichtKg,
+      abgeschlossen: data.abgeschlossen.present
+          ? data.abgeschlossen.value
+          : this.abgeschlossen,
     );
   }
 
@@ -1522,13 +1566,15 @@ class TrainingsSession extends DataClass
           ..write('id: $id, ')
           ..write('datum: $datum, ')
           ..write('standortId: $standortId, ')
-          ..write('koerpergewichtKg: $koerpergewichtKg')
+          ..write('koerpergewichtKg: $koerpergewichtKg, ')
+          ..write('abgeschlossen: $abgeschlossen')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, datum, standortId, koerpergewichtKg);
+  int get hashCode =>
+      Object.hash(id, datum, standortId, koerpergewichtKg, abgeschlossen);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1536,7 +1582,8 @@ class TrainingsSession extends DataClass
           other.id == this.id &&
           other.datum == this.datum &&
           other.standortId == this.standortId &&
-          other.koerpergewichtKg == this.koerpergewichtKg);
+          other.koerpergewichtKg == this.koerpergewichtKg &&
+          other.abgeschlossen == this.abgeschlossen);
 }
 
 class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
@@ -1544,17 +1591,20 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
   final Value<String> datum;
   final Value<int> standortId;
   final Value<double?> koerpergewichtKg;
+  final Value<bool> abgeschlossen;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.datum = const Value.absent(),
     this.standortId = const Value.absent(),
     this.koerpergewichtKg = const Value.absent(),
+    this.abgeschlossen = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
     required String datum,
     required int standortId,
     this.koerpergewichtKg = const Value.absent(),
+    this.abgeschlossen = const Value.absent(),
   }) : datum = Value(datum),
        standortId = Value(standortId);
   static Insertable<TrainingsSession> custom({
@@ -1562,12 +1612,14 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
     Expression<String>? datum,
     Expression<int>? standortId,
     Expression<double>? koerpergewichtKg,
+    Expression<bool>? abgeschlossen,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (datum != null) 'datum': datum,
       if (standortId != null) 'standort_id': standortId,
       if (koerpergewichtKg != null) 'koerpergewicht_kg': koerpergewichtKg,
+      if (abgeschlossen != null) 'abgeschlossen': abgeschlossen,
     });
   }
 
@@ -1576,12 +1628,14 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
     Value<String>? datum,
     Value<int>? standortId,
     Value<double?>? koerpergewichtKg,
+    Value<bool>? abgeschlossen,
   }) {
     return SessionsCompanion(
       id: id ?? this.id,
       datum: datum ?? this.datum,
       standortId: standortId ?? this.standortId,
       koerpergewichtKg: koerpergewichtKg ?? this.koerpergewichtKg,
+      abgeschlossen: abgeschlossen ?? this.abgeschlossen,
     );
   }
 
@@ -1600,6 +1654,9 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
     if (koerpergewichtKg.present) {
       map['koerpergewicht_kg'] = Variable<double>(koerpergewichtKg.value);
     }
+    if (abgeschlossen.present) {
+      map['abgeschlossen'] = Variable<bool>(abgeschlossen.value);
+    }
     return map;
   }
 
@@ -1609,7 +1666,8 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
           ..write('id: $id, ')
           ..write('datum: $datum, ')
           ..write('standortId: $standortId, ')
-          ..write('koerpergewichtKg: $koerpergewichtKg')
+          ..write('koerpergewichtKg: $koerpergewichtKg, ')
+          ..write('abgeschlossen: $abgeschlossen')
           ..write(')'))
         .toString();
   }
@@ -3549,6 +3607,7 @@ typedef $$SessionsTableCreateCompanionBuilder =
       required String datum,
       required int standortId,
       Value<double?> koerpergewichtKg,
+      Value<bool> abgeschlossen,
     });
 typedef $$SessionsTableUpdateCompanionBuilder =
     SessionsCompanion Function({
@@ -3556,6 +3615,7 @@ typedef $$SessionsTableUpdateCompanionBuilder =
       Value<String> datum,
       Value<int> standortId,
       Value<double?> koerpergewichtKg,
+      Value<bool> abgeschlossen,
     });
 
 final class $$SessionsTableReferences
@@ -3620,6 +3680,11 @@ class $$SessionsTableFilterComposer
 
   ColumnFilters<double> get koerpergewichtKg => $composableBuilder(
     column: $table.koerpergewichtKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get abgeschlossen => $composableBuilder(
+    column: $table.abgeschlossen,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3696,6 +3761,11 @@ class $$SessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get abgeschlossen => $composableBuilder(
+    column: $table.abgeschlossen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$StandorteTableOrderingComposer get standortId {
     final $$StandorteTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3737,6 +3807,11 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<double> get koerpergewichtKg => $composableBuilder(
     column: $table.koerpergewichtKg,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get abgeschlossen => $composableBuilder(
+    column: $table.abgeschlossen,
     builder: (column) => column,
   );
 
@@ -3821,11 +3896,13 @@ class $$SessionsTableTableManager
                 Value<String> datum = const Value.absent(),
                 Value<int> standortId = const Value.absent(),
                 Value<double?> koerpergewichtKg = const Value.absent(),
+                Value<bool> abgeschlossen = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
                 datum: datum,
                 standortId: standortId,
                 koerpergewichtKg: koerpergewichtKg,
+                abgeschlossen: abgeschlossen,
               ),
           createCompanionCallback:
               ({
@@ -3833,11 +3910,13 @@ class $$SessionsTableTableManager
                 required String datum,
                 required int standortId,
                 Value<double?> koerpergewichtKg = const Value.absent(),
+                Value<bool> abgeschlossen = const Value.absent(),
               }) => SessionsCompanion.insert(
                 id: id,
                 datum: datum,
                 standortId: standortId,
                 koerpergewichtKg: koerpergewichtKg,
+                abgeschlossen: abgeschlossen,
               ),
           withReferenceMapper: (p0) => p0
               .map(

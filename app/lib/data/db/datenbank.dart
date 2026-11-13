@@ -30,14 +30,21 @@ class Datenbank extends _$Datenbank {
 
   /// Version 1 = Datenmodell V1. Jede Strukturänderung erhöht die Version
   /// und bekommt einen Migrationsschritt (siehe [migration]).
+  /// Version 2 [Änderung M2]: Session.abgeschlossen.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
           await legeStartMuskelgruppenAn();
+        },
+        onUpgrade: (m, von, zu) async {
+          if (von < 2) {
+            // Bestehende Sessions (Import) bekommen die Vorgabe „abgeschlossen“.
+            await m.addColumn(sessions, sessions.abgeschlossen);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
