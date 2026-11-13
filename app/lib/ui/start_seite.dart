@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/db/datenbank.dart';
 import '../data/db/session_logik.dart';
+import 'eingabe_dialog.dart';
 import 'format.dart';
 import 'laufende_session.dart';
 
@@ -52,29 +53,13 @@ class _StartSeiteState extends State<StartSeite> {
   }
 
   Future<void> _neuerStandort() async {
-    final eingabe = TextEditingController();
-    final name = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Neuer Standort'),
-        content: TextField(
-          controller: eingabe,
-          autofocus: true,
-          textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(labelText: 'Name'),
-          onSubmitted: (t) => Navigator.pop(ctx, t),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Abbrechen')),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, eingabe.text),
-              child: const Text('Anlegen')),
-        ],
-      ),
+    final name = await frageText(
+      context,
+      titel: 'Neuer Standort',
+      label: 'Name',
+      okText: 'Anlegen',
+      grossschreibung: TextCapitalization.words,
     );
-    eingabe.dispose();
     if (name == null || name.trim().isEmpty) return;
     final vorhanden = _vorschlag!.standorte
         .where((s) => s.name.toLowerCase() == name.trim().toLowerCase());

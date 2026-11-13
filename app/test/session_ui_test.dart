@@ -86,7 +86,7 @@ void main() {
     final laufend = (await tester.runAsync(db.laufendeSession))!;
     await tester.runAsync(() => _satz(db, laufend.session.id, geraet));
     await warte();
-    expect(find.textContaining('Session läuft · 1 Sätze'), findsOneWidget);
+    expect(find.textContaining('Heute · 1 Sätze'), findsOneWidget);
 
     // Beenden → Startseite mit Hinweis und „Wieder aufnehmen“
     await tester.tap(find.text('Session beenden'));
