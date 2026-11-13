@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/db/datenbank.dart';
 import 'format.dart';
+import 'session_details.dart';
 
 /// Kontrollansicht M1: alle Sessions mit Datum, Standort und Anzahl Sätze.
 class SessionListe extends StatelessWidget {
@@ -46,10 +47,19 @@ class SessionListe extends StatelessWidget {
                     return ListTile(
                       title: Text(formatDatum(e.session.datum)),
                       subtitle: Text(e.standort.name),
-                      trailing: Text(
-                        '${e.anzahlSaetze} Sätze',
-                        style: Theme.of(context).textTheme.bodyLarge,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '${e.anzahlSaetze} Sätze',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          const Icon(Icons.chevron_right),
+                        ],
                       ),
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => SessionDetails(db: db, uebersicht: e),
+                      )),
                     );
                   },
                 ),

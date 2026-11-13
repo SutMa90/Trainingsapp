@@ -12,7 +12,8 @@
 *.sqlite
 *.sqlite3
 # Startdatenbank, die das Umwandlungsskript erzeugt
-app/assets/db/
+app/assets/db/*
+!app/assets/db/LIESMICH.md
 # Prüfberichte des Umwandlungsskripts (enthalten Trainingsdaten)
 app/tool/import_excel/out/
 
