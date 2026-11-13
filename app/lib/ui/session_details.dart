@@ -117,6 +117,7 @@ class SatzZeile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
+            flex: 5,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -136,12 +137,18 @@ class SatzZeile extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(eingabe, style: text.bodyLarge),
-              Text(umrechnung, style: text.bodySmall?.copyWith(color: grau)),
-            ],
+          // [Änderung 0.2.3] Bricht bei grosser Schrift um statt überzulaufen.
+          Flexible(
+            flex: 4,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(eingabe, style: text.bodyLarge, textAlign: TextAlign.end),
+                Text(umrechnung,
+                    style: text.bodySmall?.copyWith(color: grau),
+                    textAlign: TextAlign.end),
+              ],
+            ),
           ),
         ],
       ),

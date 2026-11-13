@@ -192,26 +192,45 @@ class _Kacheln extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   onTap: () => zeigeSatzErfassen(context,
                       db: db, sessionId: sessionId, geraet: g),
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(g.kuerzel,
-                            style: text.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.bold)),
-                        if (g.funktion != null)
-                          Text(g.funktion!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: text.bodySmall),
-                        if (gemacht)
-                          Text('${k.saetzeHeute} ✓',
-                              style: text.labelMedium
-                                  ?.copyWith(color: farben.primary)),
-                      ],
-                    ),
+                  // [Änderung 0.2.3] Anzahl als Abzeichen in der Ecke; der
+                  // Inhalt wird verkleinert statt abgeschnitten.
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(4, 10, 4, 6),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: SizedBox(
+                              width: 92,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(g.kuerzel,
+                                      style: text.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.bold)),
+                                  if (g.funktion != null)
+                                    Text(g.funktion!,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.center,
+                                        style: text.bodySmall),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (gemacht)
+                        Positioned(
+                          top: 4,
+                          right: 6,
+                          child: Text('${k.saetzeHeute} ✓',
+                              style: text.labelMedium?.copyWith(
+                                  color: farben.primary,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                    ],
                   ),
                 ),
               );

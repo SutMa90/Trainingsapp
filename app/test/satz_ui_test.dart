@@ -29,7 +29,7 @@ void main() {
             assistiert: Value(assistiert),
             linksRechtsGetrennt: Value(lr)));
     a2 = await geraet('A2', Einheit.lbs, 'Leg Press');
-    c3 = await geraet('C3', Einheit.lbs, 'Cable Row', lr: true);
+    c3 = await geraet('C3', Einheit.lbs, 'Hip Abduction einarmig', lr: true);
     t1 = await geraet('T1', Einheit.kg, 'Klimmzug', assistiert: true);
     // Letzte Session: A2 15 × 200 lbs
     final alt = await db.into(db.sessions).insert(
@@ -48,9 +48,25 @@ void main() {
   tearDownAll(() => db.close());
 
   testWidgets('Satz erfassen mit Vorbefüllung', (tester) async {
+    // Handy wie beim Nutzer: 1080 × 2340 Pixel (360 × 780), Android-Tasten
+    // unten (48), etwas grössere Schrift – deckt Abschneiden und Verdecken auf.
     tester.view.physicalSize = const Size(1080, 2340);
-    tester.view.devicePixelRatio = 2.625;
+    tester.view.devicePixelRatio = 3;
+    tester.view.padding = const FakeViewPadding(bottom: 144);
+    tester.view.viewPadding = const FakeViewPadding(bottom: 144);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
     addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    void speicherknopfSichtbar() {
+      final knopf = find
+          .ancestor(
+              of: find.text('Satz speichern'),
+              matching: find.byWidgetPredicate((w) => w is ButtonStyleButton))
+          .first;
+      expect(tester.getRect(knopf).bottom, lessThanOrEqualTo(780 - 48),
+          reason: 'Speicherknopf darf nicht unter den Android-Tasten liegen');
+    }
 
     Future<void> warte() async {
       for (var i = 0; i < 6; i++) {
@@ -78,7 +94,7 @@ void main() {
         .text;
 
     Future<void> schliesseFenster() async {
-      await tester.tapAt(const Offset(20, 20));
+      await tester.tap(find.byTooltip('Schliessen'));
       await warte();
     }
 
@@ -128,6 +144,7 @@ void main() {
 
     // Links/rechts: nach L wird R vorgeschlagen, Satz-Nr. pro Seite
     await tippe(find.text('C3'));
+    speicherknopfSichtbar(); // erster Satz: keine Liste darunter
     expect(feld('Wdh'), '');
     await tester.enterText(find.widgetWithText(TextField, 'Wdh'), '10');
     await tester.enterText(find.widgetWithText(TextField, 'Gewicht'), '40');
@@ -149,6 +166,7 @@ void main() {
 
     // Assistiert ohne Körpergewicht: Nachfrage, dann gespeichert
     await tippe(find.text('T1'));
+    speicherknopfSichtbar();
     expect(find.text('Satz 1 · assistiert'), findsOneWidget);
     await tester.enterText(find.widgetWithText(TextField, 'Wdh'), '8');
     await tester.enterText(find.widgetWithText(TextField, 'Unterstützung'), '30');

@@ -1,6 +1,6 @@
 # WP2.2 – Satz erfassen (F5, F6)
 
-Stand: 13.11.2026 · Status: umgesetzt (0.2.2), Test am Handy offen
+Stand: 13.11.2026 · Status: umgesetzt (0.2.3), Test am Handy offen
 
 **Abnahmekriterium:** Tests: Satz-Nr. pro Gerät/Seite, kg aus lbs, assistiert = Körpergewicht − Eingabe, Umschalten ändert die Vorgabe, alte Sätze unverändert; am Handy: Kachel → Speichern = 2 Taps.
 
@@ -37,4 +37,12 @@ Grundlage: `DATENMODELL.md` R1.5, R1.6, R2.1, R2.5, R2.7 – keine Änderung am 
 ## Ergebnis
 - `flutter test`: 43 von 43 grün (Zeitlimit pro Test). `flutter analyze`: keine Befunde. Android-Debug-Build erfolgreich.
 - Der Oberflächentest fand einen Fehler im Eingabedialog (Feld zu früh aufgeräumt), der auch den Dialog „Neuer Standort“ aus WP2.1 betraf – behoben.
-- Handy: offen.
+- Handy 0.2.2 (13.11.): Nutzer fand, dass die Android-Tasten unten den Speicherknopf beim ersten Satz eines Geräts teilweise verdecken und die Satzliste im Fenster überdecken; zusätzlich war der Inhalt farbiger Kacheln abgeschnitten.
+  Ursache: Das Fenster liess unten keinen Platz für die Android-Tasten; der automatische Test lief mit einem grösseren Bildschirm ohne Android-Tasten.
+
+## [Änderung 0.2.3] Korrekturen nach dem Handy-Test
+- **Speicherknopf fest am unteren Rand** des Fensters, immer oberhalb der Android-Tasten bzw. der Tastatur; nur der Inhalt darüber scrollt.
+- **✕ oben rechts** schliesst das Fenster (bei grosser Schrift ist das Fenster so hoch, dass „daneben tippen“ nicht mehr geht).
+- **Kacheln:** Anzahl „2 ✓“ als Abzeichen oben rechts; Kürzel und Funktion werden bei Platzmangel verkleinert statt abgeschnitten.
+- **Satzliste:** Gewicht/Umrechnung rechts bricht bei grosser Schrift um.
+- **Test** simuliert jetzt das Handy des Nutzers (360 × 780, Android-Tasten, Schrift 130 %), prüft, dass der Speicherknopf beim ersten Satz frei liegt, und schlägt bei abgeschnittenem Inhalt fehl. 43 von 43 grün.

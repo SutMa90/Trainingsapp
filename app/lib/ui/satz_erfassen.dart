@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -68,20 +70,24 @@ class _SatzErfassenState extends State<SatzErfassen> {
 
   Future<void> _lade({bool erstesMal = false}) async {
     final db = widget.db;
-    final g = await (db.select(db.geraete)
-          ..where((x) => x.id.equals(widget.geraetId)))
-        .getSingle();
+    final g = await (db.select(
+      db.geraete,
+    )..where((x) => x.id.equals(widget.geraetId))).getSingle();
     if (erstesMal && g.linksRechtsGetrennt) _seite = Seite.L;
     final v = await db.vorbefuellung(
-        sessionId: widget.sessionId, geraet: g, seite: _seite);
+      sessionId: widget.sessionId,
+      geraet: g,
+      seite: _seite,
+    );
     if (!mounted) return;
     setState(() {
       _geraet = g;
       _vorbefuellung = v;
       _einheit = v.einheit;
       _wdh.text = v.wiederholungen?.toString() ?? '';
-      _gewicht.text =
-          v.eingabewert == null ? '' : formatZahl(v.eingabewert!, stellen: 1);
+      _gewicht.text = v.eingabewert == null
+          ? ''
+          : formatZahl(v.eingabewert!, stellen: 1);
     });
   }
 
@@ -91,8 +97,9 @@ class _SatzErfassenState extends State<SatzErfassen> {
     setState(() {
       if (wert != null) {
         _gewicht.text = formatZahl(
-            aufEineStelle(ausKg(inKg(wert, _einheit), neu)),
-            stellen: 1);
+          aufEineStelle(ausKg(inKg(wert, _einheit), neu)),
+          stellen: 1,
+        );
       }
       _einheit = neu;
     });
@@ -161,7 +168,9 @@ class _SatzErfassenState extends State<SatzErfassen> {
     final v = _vorbefuellung;
     if (g == null || v == null) {
       return const SizedBox(
-          height: 200, child: Center(child: CircularProgressIndicator()));
+        height: 200,
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
     final text = Theme.of(context).textTheme;
     final grau = Theme.of(context).colorScheme.onSurfaceVariant;
@@ -174,110 +183,157 @@ class _SatzErfassenState extends State<SatzErfassen> {
           : '= ${formatZahl(kg)} kg, ${formatZahl(ausKg(kg, Einheit.lbs))} lbs';
     }
 
+    // [Änderung 0.2.3] Der Speicherknopf hat einen festen Platz am unteren
+    // Rand – immer oberhalb der Android-Tasten bzw. der Tastatur.
+    final mq = MediaQuery.of(context);
+    final unten = math.max(mq.viewInsets.bottom, mq.viewPadding.bottom);
+
     return Padding(
-      padding: EdgeInsets.fromLTRB(
-          16, 0, 16, 16 + MediaQuery.of(context).viewInsets.bottom),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${g.kuerzel}${g.funktion != null ? ' · ${g.funktion}' : ''}',
-              style: text.titleLarge,
+      padding: EdgeInsets.only(bottom: unten),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: _inhalt(g, v, text, grau, umrechnung),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Satz ${v.satzNr}${g.assistiert ? ' · assistiert' : ''}',
-              style: text.bodyMedium?.copyWith(color: grau),
-            ),
-            if (g.linksRechtsGetrennt) ...[
-              const SizedBox(height: 12),
-              SegmentedButton<Seite>(
-                segments: const [
-                  ButtonSegment(value: Seite.L, label: Text('Links')),
-                  ButtonSegment(value: Seite.R, label: Text('Rechts')),
-                ],
-                selected: {_seite ?? Seite.L},
-                onSelectionChanged: (s) => _wechsleSeite(s.first),
-              ),
-            ],
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: _Zahlenfeld(
-                    controller: _wdh,
-                    label: 'Wdh',
-                    dezimal: false,
-                    onChanged: () => setState(() {}),
+                FilledButton.icon(
+                  onPressed: _gueltig && !_speichert ? _speichere : null,
+                  icon: const Icon(Icons.check),
+                  label: const Text('Satz speichern'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(64),
+                    textStyle: text.titleMedium,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: _Zahlenfeld(
-                    controller: _gewicht,
-                    label: g.assistiert ? 'Unterstützung' : 'Gewicht',
-                    dezimal: true,
-                    onChanged: () => setState(() {}),
+                if (_bestaetigung != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      '✓ $_bestaetigung',
+                      textAlign: TextAlign.center,
+                      style: text.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
-            const SizedBox(height: 12),
-            SegmentedButton<Einheit>(
-              segments: const [
-                ButtonSegment(value: Einheit.kg, label: Text('kg')),
-                ButtonSegment(value: Einheit.lbs, label: Text('lbs')),
-              ],
-              selected: {_einheit},
-              onSelectionChanged: (s) => _wechsleEinheit(s.first),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              [
-                ?umrechnung,
-                if (v.umgerechnet) 'letzter Wert umgerechnet',
-                if (_einheit != g.einheit) 'wird neue Vorgabe des Geräts',
-              ].join(' · '),
-              style: text.bodySmall?.copyWith(color: grau),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _notiz,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Notiz (optional)',
-                isDense: true,
-                border: OutlineInputBorder(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _inhalt(
+    Geraet g,
+    Vorbefuellung v,
+    TextTheme text,
+    Color grau,
+    String? umrechnung,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '${g.kuerzel}${g.funktion != null ? ' · ${g.funktion}' : ''}',
+                style: text.titleLarge,
               ),
             ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _gueltig && !_speichert ? _speichere : null,
-              icon: const Icon(Icons.check),
-              label: const Text('Satz speichern'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(64),
-                textStyle: text.titleMedium,
-              ),
+            IconButton(
+              tooltip: 'Schliessen',
+              icon: const Icon(Icons.close),
+              onPressed: () => Navigator.of(context).pop(),
             ),
-            if (_bestaetigung != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text('✓ $_bestaetigung',
-                    textAlign: TextAlign.center,
-                    style: text.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary)),
-              ),
-            const SizedBox(height: 12),
-            _HeuteAmGeraet(
-                db: widget.db, sessionId: widget.sessionId, geraetId: g.id),
           ],
         ),
-      ),
+        Text(
+          'Satz ${v.satzNr}${g.assistiert ? ' · assistiert' : ''}',
+          style: text.bodyMedium?.copyWith(color: grau),
+        ),
+        if (g.linksRechtsGetrennt) ...[
+          const SizedBox(height: 12),
+          SegmentedButton<Seite>(
+            segments: const [
+              ButtonSegment(value: Seite.L, label: Text('Links')),
+              ButtonSegment(value: Seite.R, label: Text('Rechts')),
+            ],
+            selected: {_seite ?? Seite.L},
+            onSelectionChanged: (s) => _wechsleSeite(s.first),
+          ),
+        ],
+        const SizedBox(height: 16),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _Zahlenfeld(
+                controller: _wdh,
+                label: 'Wdh',
+                dezimal: false,
+                onChanged: () => setState(() {}),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: _Zahlenfeld(
+                controller: _gewicht,
+                label: g.assistiert ? 'Unterstützung' : 'Gewicht',
+                dezimal: true,
+                onChanged: () => setState(() {}),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        SegmentedButton<Einheit>(
+          segments: const [
+            ButtonSegment(value: Einheit.kg, label: Text('kg')),
+            ButtonSegment(value: Einheit.lbs, label: Text('lbs')),
+          ],
+          selected: {_einheit},
+          onSelectionChanged: (s) => _wechsleEinheit(s.first),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          [
+            ?umrechnung,
+            if (v.umgerechnet) 'letzter Wert umgerechnet',
+            if (_einheit != g.einheit) 'wird neue Vorgabe des Geräts',
+          ].join(' · '),
+          style: text.bodySmall?.copyWith(color: grau),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _notiz,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'Notiz (optional)',
+            isDense: true,
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _HeuteAmGeraet(
+          db: widget.db,
+          sessionId: widget.sessionId,
+          geraetId: g.id,
+        ),
+      ],
     );
   }
 }
@@ -305,11 +361,14 @@ class _Zahlenfeld extends StatelessWidget {
       inputFormatters: [
         // Wdh: ganze Zahl; Gewicht: eine Nachkommastelle (R2.5)
         FilteringTextInputFormatter.allow(
-            dezimal ? RegExp(r'^\d{0,4}([.,]\d?)?') : RegExp(r'^\d{0,3}')),
+          dezimal ? RegExp(r'^\d{0,4}([.,]\d?)?') : RegExp(r'^\d{0,3}'),
+        ),
       ],
       // Antippen markiert den Wert – Tippen ersetzt ihn direkt.
-      onTap: () => controller.selection =
-          TextSelection(baseOffset: 0, extentOffset: controller.text.length),
+      onTap: () => controller.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: controller.text.length,
+      ),
       onChanged: (_) => onChanged(),
       decoration: InputDecoration(
         labelText: label,
@@ -321,8 +380,11 @@ class _Zahlenfeld extends StatelessWidget {
 
 /// Sätze dieses Geräts in der laufenden Session.
 class _HeuteAmGeraet extends StatelessWidget {
-  const _HeuteAmGeraet(
-      {required this.db, required this.sessionId, required this.geraetId});
+  const _HeuteAmGeraet({
+    required this.db,
+    required this.sessionId,
+    required this.geraetId,
+  });
 
   final Datenbank db;
   final int sessionId;
