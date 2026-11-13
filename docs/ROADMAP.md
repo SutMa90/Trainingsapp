@@ -1,12 +1,13 @@
 # Trainings-App – Roadmap
 
-Stand: 13.11.2026 · Status: **M0 und M1 abgeschlossen – nächster Schritt M2 (Erfassung)**
+Stand: 13.11.2026 · Status: **M0 und M1 abgeschlossen – M2 (Erfassung) läuft, siehe `docs/M2.md`**
 
 ## Rahmen [Änderung M0]
 - **Tech-Stack:** Flutter (Android), lokale SQLite-Datenbank, VS Code, GitHub-Repository – analog Bierbrau-App.
 - **Werkzeuge:** Claude Code für Code, Build und Git; Cowork für Doku und Konzept.
 - **Führende Quelle:** Sobald das Repository steht, wandern ROADMAP und Backlog nach `docs/` im Repository. Der Ordner bleibt nur Arbeitskopie.
 - **Keine KI** bis auf Weiteres; Auswertungen regelbasiert, als Text **und** Grafik.
+- **[Änderung M2] Versionierung bis V1:** `0.x` – jede Testinstallation bekommt eine neue Versionsnummer; `1.0.0` = Version 1 fertig (Nutzerwunsch 13.11.2026).
 Grundlage: `Trainings-App_Logikzusammenfassung.md`
 Ideen außerhalb von V1: siehe `IDEEN-BACKLOG.md`
 
@@ -37,7 +38,7 @@ Das Training komplett ohne Chat erfassen und auswerten – schneller als heute u
 |---|---|---|---|
 | M0 | Konzept: Tech-Stack, Datenmodell (in Runden à 5–7 Punkte), V1-Umfang final | Chat / Cowork | Datenmodell-Dokument und V1-Liste vom Nutzer freigegeben |
 | M1 ✅ | GitHub-Repository + Flutter-Grundgerüst, Datenbank, Umwandlungsskript Excel → Startdatenbank, Kürzel-Bereinigung | Claude Code | App startet auf dem Handy mit allen alten Log-Zeilen; 5 Stichproben-Sessions stimmen mit der Excel überein → **erfüllt 13.11.2026** |
-| M2 | Erfassung: Session, Gerätekacheln, Satz-Eingabe, Korrektur, neues Gerät | Claude Code | Eine echte Session im Gym ohne Chat erfasst; ein Satz mit Vorbefüllung in ≤ 5 Sekunden |
+| M2 🔄 | Erfassung: Session, Gerätekacheln, Satz-Eingabe, Korrektur, neues Gerät; Rückübertragung in die Excel (I-21) [Änderung M2] | Claude Code | Eine echte Session im Gym ohne Chat erfasst; ein Satz mit Vorbefüllung in ≤ 5 Sekunden; Rückübertragung ergänzt die Session vollständig in der echten Excel [Änderung M2] |
 | M3 | Session-Report (Text + Grafik) [Änderung M0: Export gestrichen] | Claude Code | Report einer echten Session deckt sich inhaltlich mit der bisherigen Chat-Auswertung |
 | M4 | Praxistest 2–3 Wochen, Fehler beheben, Retrospektive | Gym + Code | 6 Sessions ohne Datenverlust und ohne Rückgriff auf den Chat → **V1 fertig** |
 

@@ -23,3 +23,7 @@ Begriffe, wie sie in App, Doku und Code verwendet werden. Neue Begriffe werden l
 | **Entscheidungsdatei** | Datei mit den Entscheidungen des Nutzers zu gemeldeten Fällen (z. B. Doppel-Kürzel). Für Testdaten im Repo, für echte Daten nur lokal. |
 | **Testdaten** | Synthetische Excel `testdaten/Testlog.xlsx` mit erfundenen Werten und allen bekannten Sonderfällen; Grundlage der automatischen Tests. |
 | **Stichprobe** | Session, die Satz für Satz zwischen Excel und App verglichen wird (Abnahme M1). |
+| **Rückübertragung** | Skript auf dem PC, das in der App erfasste Sessions im bisherigen Format in die Excel ergänzt (Datensicherung, I-21). Bestehende Zeilen bleiben unverändert. |
+| **Sicherungskopie** | Kopie der Excel bzw. der App-Datenbank, die vor jedem Schreiben angelegt und nie gelöscht wird. Der Dateiname trägt das Datum der letzten Trainings-Session. |
+| **Probelauf** | Rückübertragung, die nur zeigt, was ergänzt würde, ohne zu schreiben. |
+| **Stichtag / Umstieg** | Moment, ab dem die App die Quelle ist: letzter Import aus der Excel, danach nie mehr deinstallieren. |

@@ -64,3 +64,6 @@ desktop.ini
 *.log
 *.swp
 ~$*
+
+# Sicherungen der Rückübertragung (echte Daten)
+Sicherungen/
