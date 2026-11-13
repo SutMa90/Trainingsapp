@@ -1,6 +1,6 @@
 # WP2.2 – Satz erfassen (F5, F6)
 
-Stand: 13.11.2026 · Status: umgesetzt (0.2.3), Test am Handy offen
+Stand: 13.11.2026 · Status: ✅ abgenommen (0.2.3)
 
 **Abnahmekriterium:** Tests: Satz-Nr. pro Gerät/Seite, kg aus lbs, assistiert = Körpergewicht − Eingabe, Umschalten ändert die Vorgabe, alte Sätze unverändert; am Handy: Kachel → Speichern = 2 Taps.
 
@@ -46,3 +46,4 @@ Grundlage: `DATENMODELL.md` R1.5, R1.6, R2.1, R2.5, R2.7 – keine Änderung am 
 - **Kacheln:** Anzahl „2 ✓“ als Abzeichen oben rechts; Kürzel und Funktion werden bei Platzmangel verkleinert statt abgeschnitten.
 - **Satzliste:** Gewicht/Umrechnung rechts bricht bei grosser Schrift um.
 - **Test** simuliert jetzt das Handy des Nutzers (360 × 780, Android-Tasten, Schrift 130 %), prüft, dass der Speicherknopf beim ersten Satz frei liegt, und schlägt bei abgeschnittenem Inhalt fehl. 43 von 43 grün.
+- Handy 0.2.3 (13.11.): Speicherknopf frei, ✕ funktioniert, Kacheln vollständig; Nutzer: „jetzt sieht alles gut aus“. ✅
