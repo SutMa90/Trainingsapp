@@ -38,6 +38,28 @@ class GeraetKachel {
   const GeraetKachel({required this.geraet, required this.saetzeHeute});
 }
 
+/// WP2.3: Sätze einer früheren Session an einem Gerät (F7).
+class LetztesMal {
+  final TrainingsSession session;
+  final Standort standort;
+  final Geraet geraet;
+  final List<Satz> saetze;
+  const LetztesMal({
+    required this.session,
+    required this.standort,
+    required this.geraet,
+    required this.saetze,
+  });
+}
+
+/// Tage zwischen zwei Kalendertagen `JJJJ-MM-TT` (bis − von).
+int tageZwischen(String von, String bis) =>
+    DateTime.utc(int.parse(bis.substring(0, 4)), int.parse(bis.substring(5, 7)),
+            int.parse(bis.substring(8, 10)))
+        .difference(DateTime.utc(int.parse(von.substring(0, 4)),
+            int.parse(von.substring(5, 7)), int.parse(von.substring(8, 10))))
+        .inDays;
+
 /// Fehlendes Körpergewicht bei einem assistierten Gerät.
 class KoerpergewichtFehlt implements Exception {
   const KoerpergewichtFehlt();
@@ -125,7 +147,14 @@ extension SatzLogik on Datenbank {
     Seite? seite,
   }) async {
     final nr = await naechsteSatzNr(sessionId, geraet.id, seite);
-    final letzter = await letzterSatz(geraet.id, seite: seite);
+    // [Änderung WP2.3] Zuerst derselbe Satz (Nr. + Seite) vom letzten Mal an
+    // diesem Gerät; gibt es den nicht, der zuletzt gespeicherte Satz.
+    final letztesMal =
+        await letzteSessionAmGeraet(geraet.id, ohneSessionId: sessionId);
+    final letzter = letztesMal?.saetze
+            .where((s) => s.satzNr == nr && s.seite == seite)
+            .firstOrNull ??
+        await letzterSatz(geraet.id, seite: seite);
     if (letzter == null) {
       return Vorbefuellung(einheit: geraet.einheit, satzNr: nr);
     }
@@ -203,6 +232,112 @@ extension SatzLogik on Datenbank {
   Future<void> setzeKoerpergewicht(int sessionId, double kg) =>
       (update(sessions)..where((s) => s.id.equals(sessionId)))
           .write(SessionsCompanion(koerpergewichtKg: Value(kg)));
+
+  // ------------------------------------------------ WP2.3 letzte Werte (F7)
+
+  /// Letzte Session (ausser [ohneSessionId]) mit Sätzen an diesem Gerät –
+  /// egal wie lange her (Nutzerentscheid 13.11.2026).
+  Future<LetztesMal?> letzteSessionAmGeraet(int geraetId,
+      {int? ohneSessionId}) async {
+    final q = select(saetze).join([
+      innerJoin(sessions, sessions.id.equalsExp(saetze.sessionId)),
+    ])
+      ..where(saetze.geraetId.equals(geraetId) &
+          (ohneSessionId == null
+              ? const Constant(true)
+              : saetze.sessionId.equals(ohneSessionId).not()))
+      ..orderBy([OrderingTerm.desc(sessions.datum), OrderingTerm.desc(sessions.id)])
+      ..limit(1);
+    final r = await q.getSingleOrNull();
+    if (r == null) return null;
+    return _letztesMal(r.readTable(sessions), geraetId);
+  }
+
+  /// Letzte Werte „überhaupt“: Gerät mit gleicher Funktion an einem anderen
+  /// Standort (Nutzerentscheid 13.11.2026, Variante b). Nur wenn diese
+  /// Session neuer ist als das letzte Mal an [geraet] selbst.
+  Future<LetztesMal?> letztesMalAndererStandort(Geraet geraet,
+      {int? ohneSessionId}) async {
+    final funktion = geraet.funktion?.trim().toLowerCase();
+    if (funktion == null || funktion.isEmpty) return null;
+    final gleiche = (await (select(geraete)
+              ..where((g) => g.standortId.equals(geraet.standortId).not()))
+            .get())
+        .where((g) => g.funktion?.trim().toLowerCase() == funktion)
+        .map((g) => g.id)
+        .toList();
+    if (gleiche.isEmpty) return null;
+    final q = select(saetze).join([
+      innerJoin(sessions, sessions.id.equalsExp(saetze.sessionId)),
+    ])
+      ..where(saetze.geraetId.isIn(gleiche) &
+          (ohneSessionId == null
+              ? const Constant(true)
+              : saetze.sessionId.equals(ohneSessionId).not()))
+      ..orderBy([
+        OrderingTerm.desc(sessions.datum),
+        OrderingTerm.desc(sessions.id),
+        OrderingTerm.desc(saetze.id),
+      ])
+      ..limit(1);
+    final r = await q.getSingleOrNull();
+    if (r == null) return null;
+    final dort = r.readTable(sessions);
+    final hier =
+        await letzteSessionAmGeraet(geraet.id, ohneSessionId: ohneSessionId);
+    if (hier != null && hier.session.datum.compareTo(dort.datum) >= 0) {
+      return null;
+    }
+    return _letztesMal(dort, r.readTable(saetze).geraetId);
+  }
+
+  Future<LetztesMal> _letztesMal(TrainingsSession s, int geraetId) async {
+    final standort = await (select(standorte)
+          ..where((x) => x.id.equals(s.standortId)))
+        .getSingle();
+    final g = await (select(geraete)..where((x) => x.id.equals(geraetId)))
+        .getSingle();
+    final liste = await (select(saetze)
+          ..where((x) => x.sessionId.equals(s.id) & x.geraetId.equals(geraetId))
+          ..orderBy([(x) => OrderingTerm.asc(x.id)]))
+        .get();
+    return LetztesMal(session: s, standort: standort, geraet: g, saetze: liste);
+  }
+
+  /// „Wie letztes Mal“: speichert alle Sätze vom letzten Mal an diesem Gerät
+  /// (Wdh, Eingabewert, Eingabeeinheit, Seite; ohne Notiz). Nur solange es
+  /// heute an diesem Gerät noch keinen Satz gibt. Gibt die neuen ids zurück.
+  Future<List<int>> wieLetztesMal(int sessionId, int geraetId) {
+    return transaction(() async {
+      final heute = await (select(saetze)
+            ..where((s) => s.sessionId.equals(sessionId) & s.geraetId.equals(geraetId)))
+          .get();
+      if (heute.isNotEmpty) {
+        throw StateError('An diesem Gerät gibt es heute schon Sätze.');
+      }
+      final letztes =
+          await letzteSessionAmGeraet(geraetId, ohneSessionId: sessionId);
+      if (letztes == null) {
+        throw StateError('An diesem Gerät gibt es noch kein letztes Mal.');
+      }
+      final ids = <int>[];
+      for (final s in letztes.saetze) {
+        ids.add(await speichereSatz(
+          sessionId: sessionId,
+          geraetId: geraetId,
+          seite: s.seite,
+          wiederholungen: s.wiederholungen,
+          eingabewert: s.eingabewert,
+          einheit: s.eingabeeinheit,
+        ));
+      }
+      return ids;
+    });
+  }
+
+  /// Löscht Sätze (z. B. „Rückgängig“ nach „wie letztes Mal“).
+  Future<void> loescheSaetze(List<int> ids) =>
+      (delete(saetze)..where((s) => s.id.isIn(ids))).go();
 
   /// Sätze eines Geräts in einer Session (für den Erfassungsbildschirm).
   Stream<List<Satz>> beobachteSaetzeDesGeraets(int sessionId, int geraetId) =>

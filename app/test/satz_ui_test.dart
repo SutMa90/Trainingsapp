@@ -12,8 +12,11 @@ import 'package:trainingsapp/data/db/session_logik.dart';
 import 'package:trainingsapp/main.dart';
 
 void main() {
+  // Ein Tipp, der sein Ziel verfehlt (z. B. verdeckt), lässt den Test scheitern.
+  WidgetController.hitTestWarningShouldBeFatal = true;
+
   late Datenbank db;
-  late int sued, a2, c3, t1, session;
+  late int sued, a2, b4, c3, t1, session;
 
   setUpAll(() async {
     db = Datenbank(DatabaseConnection(NativeDatabase.memory(),
@@ -42,6 +45,35 @@ void main() {
         eingabewert: 200,
         eingabeeinheit: Einheit.lbs,
         gewichtKg: inKg(200, Einheit.lbs)));
+    // WP2.3: B4 mit zwei Sätzen letztes Mal (für „wie letztes Mal“)
+    b4 = await geraet('B4', Einheit.kg, 'Row');
+    for (final (nr, wdh, kg) in [(1, 15, 41.0), (2, 20, 45.0)]) {
+      await db.into(db.saetze).insert(SaetzeCompanion.insert(
+          sessionId: alt,
+          geraetId: b4,
+          satzNr: nr,
+          wiederholungen: wdh,
+          eingabewert: kg,
+          eingabeeinheit: Einheit.kg,
+          gewichtKg: kg));
+    }
+    // WP2.3: Leg Press am anderen Standort, neuer als A2 hier
+    final nord = await db.legeStandortAn('Nordstadt');
+    final l1 = await db.into(db.geraete).insert(GeraeteCompanion.insert(
+        standortId: nord,
+        kuerzel: 'L1',
+        funktion: const Value('Leg Press'),
+        einheit: Einheit.kg));
+    final dort = await db.into(db.sessions).insert(
+        SessionsCompanion.insert(datum: '2026-11-12', standortId: nord));
+    await db.into(db.saetze).insert(SaetzeCompanion.insert(
+        sessionId: dort,
+        geraetId: l1,
+        satzNr: 1,
+        wiederholungen: 12,
+        eingabewert: 95,
+        eingabeeinheit: Einheit.kg,
+        gewichtKg: 95));
     // Laufende Session ohne Körpergewicht
     session = await db.starteSession(standortId: sued, heute: '2026-11-13');
   });
@@ -112,6 +144,15 @@ void main() {
     expect(feld('Wdh'), '15');
     expect(feld('Gewicht'), '200');
     expect(find.textContaining('= 90,72 kg, 200 lbs'), findsOneWidget);
+    // WP2.3: letzte Werte hier und am anderen Standort (gleiche Funktion, neuer)
+    expect(find.text('Letztes Mal hier: 10.11.2026 (vor 3 Tagen)'),
+        findsOneWidget);
+    expect(find.text('Satz 1: 15 × 200 lbs'), findsOneWidget);
+    expect(find.textContaining('90,72 kg, 200 lbs'), findsWidgets);
+    expect(find.text('Zuletzt in Nordstadt: 12.11.2026 (gestern) · L1'),
+        findsOneWidget);
+    expect(find.text('Satz 1: 12 × 95 kg'), findsOneWidget);
+    expect(find.text('Wie letztes Mal (1 Satz)'), findsOneWidget);
 
     // Tap 2: speichern
     await tippe(find.text('Satz speichern'));
@@ -182,6 +223,60 @@ void main() {
     expect(t1Satz.gewichtKg, 50);
     await schliesseFenster();
 
+    await tester.pumpWidget(const SizedBox());
+    await warte();
+  }, timeout: const Timeout(Duration(seconds: 90)));
+
+  testWidgets('Wie letztes Mal und Rückgängig', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2340);
+    tester.view.devicePixelRatio = 3;
+    tester.view.padding = const FakeViewPadding(bottom: 144);
+    tester.view.viewPadding = const FakeViewPadding(bottom: 144);
+    addTearDown(tester.view.reset);
+
+    Future<void> warte() async {
+      for (var i = 0; i < 6; i++) {
+        await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 50)));
+        await tester.pump(const Duration(milliseconds: 300));
+      }
+    }
+
+    Future<void> tippe(Finder f) async {
+      await tester.ensureVisible(f);
+      await tester.tap(f);
+      await warte();
+    }
+
+    Future<List<Satz>> b4Heute() async =>
+        (await tester.runAsync(() => (db.select(db.saetze)
+              ..where((s) => s.sessionId.equals(session) & s.geraetId.equals(b4))
+              ..orderBy([(s) => OrderingTerm.asc(s.id)]))
+            .get()))!;
+
+    await tester.pumpWidget(
+        TrainingsApp(db: db, jetzt: () => DateTime(2026, 11, 13, 19)));
+    await warte();
+    await tippe(find.text('B4'));
+    // Vorbefüllung Satz 1 = Satz 1 vom letzten Mal
+    expect(find.text('Satz 1'), findsOneWidget);
+    expect(find.text('Wie letztes Mal (2 Sätze)'), findsOneWidget);
+
+    await tippe(find.text('Wie letztes Mal (2 Sätze)'));
+    expect(find.text('✓ 2 Sätze wie letztes Mal gespeichert'), findsOneWidget);
+    expect(find.text('Wie letztes Mal (2 Sätze)'), findsNothing);
+    expect(find.text('Satz 3'), findsOneWidget);
+    expect((await b4Heute()).map((s) => (s.satzNr, s.wiederholungen, s.eingabewert)),
+        [(1, 15, 41.0), (2, 20, 45.0)]);
+
+    await tippe(find.text('Rückgängig'));
+    expect(find.text('✓ Rückgängig gemacht'), findsOneWidget);
+    expect(await b4Heute(), isEmpty);
+    expect(find.text('Satz 1'), findsOneWidget);
+    expect(find.text('Wie letztes Mal (2 Sätze)'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Schliessen'));
+    await warte();
     await tester.pumpWidget(const SizedBox());
     await warte();
   }, timeout: const Timeout(Duration(seconds: 90)));

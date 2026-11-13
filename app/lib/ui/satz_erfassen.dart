@@ -54,6 +54,14 @@ class _SatzErfassenState extends State<SatzErfassen> {
   String? _bestaetigung;
   bool _speichert = false;
 
+  // WP2.3 letzte Werte (F7)
+  String? _heuteDatum;
+  LetztesMal? _letztesHier;
+  LetztesMal? _andererStandort;
+
+  /// ids der Sätze aus „wie letztes Mal“ (für „Rückgängig“).
+  List<int>? _kopiert;
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +87,20 @@ class _SatzErfassenState extends State<SatzErfassen> {
       geraet: g,
       seite: _seite,
     );
+    if (erstesMal) {
+      final s = await (db.select(
+        db.sessions,
+      )..where((x) => x.id.equals(widget.sessionId))).getSingle();
+      _heuteDatum = s.datum;
+      _letztesHier = await db.letzteSessionAmGeraet(
+        g.id,
+        ohneSessionId: widget.sessionId,
+      );
+      _andererStandort = await db.letztesMalAndererStandort(
+        g,
+        ohneSessionId: widget.sessionId,
+      );
+    }
     if (!mounted) return;
     setState(() {
       _geraet = g;
@@ -135,6 +157,7 @@ class _SatzErfassenState extends State<SatzErfassen> {
       return;
     }
     HapticFeedback.mediumImpact();
+    _kopiert = null;
     final seiteText = _seite == null ? '' : ' ${_seite!.name}';
     _notiz.clear();
     // Bei links/rechts getrennten Geräten danach die andere Seite vorschlagen.
@@ -144,6 +167,52 @@ class _SatzErfassenState extends State<SatzErfassen> {
     setState(() {
       _speichert = false;
       _bestaetigung = 'Satz $nr$seiteText gespeichert';
+    });
+  }
+
+  /// „Wie letztes Mal“: alle Sätze vom letzten Mal auf einmal speichern.
+  Future<void> _wieLetztesMal() async {
+    if (_speichert) return;
+    setState(() => _speichert = true);
+    try {
+      final ids = await widget.db.wieLetztesMal(
+        widget.sessionId,
+        widget.geraetId,
+      );
+      HapticFeedback.mediumImpact();
+      if (_seite != null) _seite = Seite.L;
+      await _lade();
+      if (!mounted) return;
+      setState(() {
+        _kopiert = ids;
+        _bestaetigung =
+            '${_anzahlSaetze(ids.length)} wie letztes Mal gespeichert';
+      });
+    } on KoerpergewichtFehlt {
+      final ok = await _frageKoerpergewicht();
+      setState(() => _speichert = false);
+      if (ok) await _wieLetztesMal();
+      return;
+    } on StateError catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
+    }
+    if (mounted) setState(() => _speichert = false);
+  }
+
+  Future<void> _rueckgaengig() async {
+    final ids = _kopiert;
+    if (ids == null) return;
+    await widget.db.loescheSaetze(ids);
+    if (_seite != null) _seite = Seite.L;
+    await _lade();
+    if (!mounted) return;
+    setState(() {
+      _kopiert = null;
+      _bestaetigung = 'Rückgängig gemacht';
     });
   }
 
@@ -194,6 +263,25 @@ class _SatzErfassenState extends State<SatzErfassen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Titel mit ✕ bleibt beim Scrollen stehen.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 4, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${g.kuerzel}${g.funktion != null ? ' · ${g.funktion}' : ''}',
+                    style: text.titleLarge,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Schliessen',
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          ),
           Flexible(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -217,13 +305,25 @@ class _SatzErfassenState extends State<SatzErfassen> {
                 ),
                 if (_bestaetigung != null)
                   Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      '✓ $_bestaetigung',
-                      textAlign: TextAlign.center,
-                      style: text.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '✓ $_bestaetigung',
+                            textAlign: TextAlign.center,
+                            style: text.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                        if (_kopiert != null)
+                          TextButton(
+                            onPressed: _rueckgaengig,
+                            child: const Text('Rückgängig'),
+                          ),
+                      ],
                     ),
                   ),
               ],
@@ -245,21 +345,6 @@ class _SatzErfassenState extends State<SatzErfassen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                '${g.kuerzel}${g.funktion != null ? ' · ${g.funktion}' : ''}',
-                style: text.titleLarge,
-              ),
-            ),
-            IconButton(
-              tooltip: 'Schliessen',
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
-        ),
         Text(
           'Satz ${v.satzNr}${g.assistiert ? ' · assistiert' : ''}',
           style: text.bodyMedium?.copyWith(color: grau),
@@ -317,6 +402,47 @@ class _SatzErfassenState extends State<SatzErfassen> {
           ].join(' · '),
           style: text.bodySmall?.copyWith(color: grau),
         ),
+        // WP2.3: letzte Werte (F7) und „wie letztes Mal“
+        if (_letztesHier != null) ...[
+          const SizedBox(height: 12),
+          _LetztesMalBlock(
+            titel: 'Letztes Mal hier',
+            letztes: _letztesHier!,
+            heute: _heuteDatum!,
+            mitGeraet: false,
+          ),
+          StreamBuilder<List<Satz>>(
+            stream: widget.db.beobachteSaetzeDesGeraets(widget.sessionId, g.id),
+            builder: (context, snap) {
+              if (!snap.hasData || snap.data!.isNotEmpty) {
+                return const SizedBox.shrink();
+              }
+              return Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: OutlinedButton.icon(
+                  onPressed: _speichert ? null : _wieLetztesMal,
+                  icon: const Icon(Icons.replay),
+                  label: Text(
+                    'Wie letztes Mal '
+                    '(${_anzahlSaetze(_letztesHier!.saetze.length)})',
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+        if (_andererStandort != null) ...[
+          const SizedBox(height: 12),
+          _LetztesMalBlock(
+            titel: 'Zuletzt in ${_andererStandort!.standort.name}',
+            letztes: _andererStandort!,
+            heute: _heuteDatum!,
+            mitGeraet: true,
+          ),
+        ],
         const SizedBox(height: 12),
         TextField(
           controller: _notiz,
@@ -413,6 +539,73 @@ class _HeuteAmGeraet extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+String _anzahlSaetze(int n) => n == 1 ? '1 Satz' : '$n Sätze';
+
+String _vorTagen(int tage) => switch (tage) {
+  0 => 'heute',
+  1 => 'gestern',
+  _ => 'vor $tage Tagen',
+};
+
+/// WP2.3 (F7): Sätze einer früheren Session, Anzeige immer in beiden
+/// Einheiten (R1.6).
+class _LetztesMalBlock extends StatelessWidget {
+  const _LetztesMalBlock({
+    required this.titel,
+    required this.letztes,
+    required this.heute,
+    required this.mitGeraet,
+  });
+
+  final String titel;
+  final LetztesMal letztes;
+  final String heute;
+  final bool mitGeraet;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final grau = Theme.of(context).colorScheme.onSurfaceVariant;
+    final s = letztes.session;
+    final g = letztes.geraet;
+    final kopf = StringBuffer(
+      '$titel: ${formatDatum(s.datum)} '
+      '(${_vorTagen(tageZwischen(s.datum, heute))})',
+    );
+    if (mitGeraet) kopf.write(' · ${g.kuerzel}');
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(kopf.toString(), style: text.labelLarge),
+          const SizedBox(height: 4),
+          for (final satz in letztes.saetze) ...[
+            Text(
+              'Satz ${satz.satzNr}'
+              '${satz.seite == null ? '' : ' ${satz.seite!.name}'}: '
+              '${satz.wiederholungen} × ${formatZahl(satz.eingabewert)} '
+              '${satz.eingabeeinheit.name}',
+              style: text.bodyMedium,
+            ),
+            Text(
+              '   ${g.assistiert ? 'effektiv ' : ''}'
+              '${formatZahl(satz.gewichtKg)} kg, '
+              '${formatZahl(ausKg(satz.gewichtKg, Einheit.lbs))} lbs'
+              '${satz.notiz == null ? '' : ' · ${satz.notiz}'}',
+              style: text.bodySmall?.copyWith(color: grau),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

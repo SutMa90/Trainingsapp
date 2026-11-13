@@ -13,6 +13,9 @@ import 'package:trainingsapp/main.dart';
 import 'package:trainingsapp/version.dart';
 
 void main() {
+  // Ein Tipp, der sein Ziel verfehlt (z. B. verdeckt), lässt den Test scheitern.
+  WidgetController.hitTestWarningShouldBeFatal = true;
+
   late Datenbank db;
   late int sued, geraet;
 

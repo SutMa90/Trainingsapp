@@ -12,6 +12,9 @@ import '../tool/import_excel/importer.dart';
 import '../tool/import_excel/xlsx_leser.dart';
 
 void main() {
+  // Ein Tipp, der sein Ziel verfehlt (z. B. verdeckt), lässt den Test scheitern.
+  WidgetController.hitTestWarningShouldBeFatal = true;
+
   late Datenbank db;
 
   // Datenbank ausserhalb der simulierten Test-Zeit anlegen und befüllen.
