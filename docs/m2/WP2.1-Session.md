@@ -1,6 +1,6 @@
 # WP2.1 – Session starten und beenden (F4)
 
-Stand: 13.11.2026 · Status: umgesetzt, Test am Handy offen
+Stand: 13.11.2026 · Status: ✅ abgenommen
 
 **Abnahmekriterium:** Session starten → App ganz schliessen → wieder öffnen: dieselbe Session läuft weiter; nach „Beenden“ erscheint sie in der Session-Liste; automatische Tests grün.
 
@@ -37,4 +37,5 @@ Stand: 13.11.2026 · Status: umgesetzt, Test am Handy offen
 ## Ergebnis
 - `flutter test`: 33 von 33 grün (Zeitlimit pro Test).
 - `flutter analyze`: keine Befunde. Android-Debug-Build erfolgreich.
-- Handy: offen (Installation „drüber“, die bestehende Datenbank wird dabei auf Version 2 umgestellt).
+- Handy (13.11.): 0.2.1 „drüber“ installiert; Datenbank automatisch auf Version 2 umgestellt, weiterhin 13 Sessions / 276 Sätze. Vorher Sicherung der Handy-Datenbank in `Sicherungen/` (nicht im Repo).
+- Prüfung durch den Nutzer: Start mit Vorbelegung, App schliessen/öffnen → Session läuft weiter, Beenden ohne Sätze → verworfen. ✅
