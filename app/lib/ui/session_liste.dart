@@ -80,9 +80,16 @@ class _SessionListeState extends State<SessionListe>
           // WP2.5: Geräteverwaltung
           PopupMenuButton<String>(
             tooltip: 'Menü',
-            onSelected: (_) => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => GeraeteVerwaltung(db: db)),
-            ),
+            onSelected: (_) {
+              // [Änderung 0.2.8] Hinweis „Session beendet · Wieder aufnehmen“
+              // ausblenden: Er verdeckte in der Geräteverwaltung das letzte
+              // Gerät bzw. im Formular den Speicherknopf (Handy-Test 14.11.).
+              // Wieder aufnehmen geht weiter über die Session in der Liste.
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => GeraeteVerwaltung(db: db)),
+              );
+            },
             itemBuilder: (_) => const [
               PopupMenuItem(value: 'geraete', child: Text('Geräte')),
             ],

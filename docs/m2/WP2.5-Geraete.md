@@ -1,6 +1,6 @@
 # WP2.5 – Geräteverwaltung und neues Gerät (F3), Datenpflege I-19
 
-Stand: 14.11.2026 · Status: 🔄 0.2.7 (Korrektur Löschknopf), Abnahme am Handy offen
+Stand: 14.11.2026 · Status: 🔄 0.2.8 (Hinweis „Wieder aufnehmen“), Abnahme am Handy offen
 
 **Abnahmekriterium:** Neues Gerät in ≤ 30 s angelegt und sofort als Kachel da; der Nutzer hat T1/T2/C3 (Muskelgruppe), D1 Dielsdorf (Vorgabe-Einheit) und B3/C1 Grüze (Funktion) selbst in der App nachgetragen.
 
@@ -55,3 +55,9 @@ Grundlage: `DATENMODELL.md` R1.2, R1.3, R1.6, R2.2, R2.4. Keine neue Datenbank-V
 - **Löschknopf 🗑 immer sichtbar** bei bestehenden Geräten. Hat das Gerät Sätze, erklärt ein Hinweis, warum Löschen nicht geht, und wie es trotzdem geht: Sätze von heute in der Session antippen und löschen, danach das Gerät löschen.
 - Hinweis im Formular in Einzahl/Mehrzahl („Bisher: 1 Satz – bleibt unverändert“).
 - `flutter test`: 70 von 70 grün, Oberflächentest prüft den Hinweis.
+- Handy 0.2.7 (14.11.): Löschknopf ok. Neuer Befund: Der Hinweis „Session beendet · Wieder aufnehmen“ (8 s) kann in der Geräteverwaltung das letzte Gerät verdecken. Ursache: Hinweise der App erscheinen auf jeder geöffneten Seite, auch im Formular (dort über dem Speicherknopf).
+
+## [Änderung 0.2.8] Hinweis „Wieder aufnehmen“ beim Öffnen der Geräte ausblenden
+- Beim Öffnen von ⋮ → „Geräte“ verschwindet der Hinweis (Vorschlag). Wieder aufnehmen geht am selben Tag weiter über die Session in der Liste („Session wieder aufnehmen“).
+- Oberflächentest: Session beenden → Geräte → kein Hinweis, letztes Gerät und Speicherknopf im Formular frei. (Die Startseite mit dem Hinweis wird im Test mit Schrift 100 % geprüft: Die Testschrift zeichnet jeden Buchstaben als Quadrat, „Wieder aufnehmen“ wäre bei 130 % breiter als der Bildschirm – am Handy passt es.)
+- `flutter test`: 70 von 70 grün.

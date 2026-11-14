@@ -9,6 +9,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trainingsapp/data/db/datenbank.dart';
+import 'package:trainingsapp/data/db/satz_logik.dart';
 import 'package:trainingsapp/data/db/session_logik.dart';
 import 'package:trainingsapp/main.dart';
 
@@ -219,5 +220,34 @@ void main() {
     expect(await geraet(nord, 'N2'), isNotNull);
     a2neu = (await geraet(sued, 'A2'))!;
     expect(a2neu.kuerzel, 'A2');
+
+    // [Änderung 0.2.8] Hinweis „Wieder aufnehmen“ nach dem Beenden erscheint
+    // nicht in der Geräteverwaltung (verdeckte dort das letzte Gerät).
+    await tippe(find.byType(BackButton));
+    final laufend = (await tester.runAsync(() => db.laufendeSession()))!;
+    await tester.runAsync(() => db.speichereSatz(
+        sessionId: laufend.session.id,
+        geraetId: a2,
+        seite: Seite.L,
+        wiederholungen: 10,
+        eingabewert: 50,
+        einheit: Einheit.lbs));
+    await tippe(find.text('Weiter'));
+    // Testschrift: jeder Buchstabe ist ein Quadrat – „Wieder aufnehmen“ wird
+    // bei 130 % breiter als der Bildschirm (am Handy passt es). Darum nur für
+    // die Zeit, in der der Hinweis besteht, Schrift 100 %, danach wieder 130 %.
+    tester.platformDispatcher.textScaleFactorTestValue = 1.0;
+    await tippe(find.text('Session beenden'));
+    expect(find.text('Wieder aufnehmen'), findsOneWidget);
+    await tippe(find.byTooltip('Menü'));
+    await tippe(find.text('Geräte'));
+    expect(find.widgetWithText(AppBar, 'Geräte'), findsOneWidget);
+    expect(find.text('Wieder aufnehmen'), findsNothing);
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+    await warte();
+    await tippe(find.textContaining('X9'));
+    expect(find.text('Gerät X9'), findsOneWidget);
+    expect(find.text('Wieder aufnehmen'), findsNothing);
+    knopfFrei('Änderung speichern');
   }, timeout: const Timeout(Duration(seconds: 90)));
 }
