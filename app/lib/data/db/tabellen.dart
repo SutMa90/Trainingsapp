@@ -66,6 +66,10 @@ class Sessions extends Table {
   /// Importierte Sessions gelten als abgeschlossen (Vorgabe ja); die App legt
   /// neue Sessions ausdrücklich mit „nein“ an. Regeln: DATENMODELL R1.4.
   BoolColumn get abgeschlossen => boolean().withDefault(const Constant(true))();
+
+  /// [Änderung M2] Datenbank-Version 3: App-Version beim Anlegen der Session,
+  /// z. B. `0.2.5`. Leer = importiert (Anzeige „imp“).
+  TextColumn get appVersion => text().nullable()();
 }
 
 /// R1.5 / R2.7 Satz.

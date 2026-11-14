@@ -5,7 +5,9 @@ import '../data/db/satz_logik.dart';
 import '../data/db/session_logik.dart';
 import 'format.dart';
 import 'satz_erfassen.dart';
+import 'satz_bearbeiten.dart';
 import 'session_details.dart';
+import 'session_loeschen.dart';
 
 /// WP2.1 Laufende Session: Sätze von heute und „Session beenden“.
 /// [Änderung WP2.2] Gerätekacheln oben, darunter die Sätze von heute.
@@ -28,25 +30,31 @@ class LaufendeSessionSeite extends StatelessWidget {
     navigator.pop();
     messenger.showSnackBar(switch (ergebnis) {
       BeendenErgebnis.leerVerworfen => const SnackBar(
-          content: Text('Session ohne Sätze verworfen.')),
+        content: Text('Session ohne Sätze verworfen.'),
+      ),
       BeendenErgebnis.beendet => SnackBar(
-          content: const Text('Session beendet.'),
-          duration: const Duration(seconds: 8),
-          action: SnackBarAction(
-            label: 'Wieder aufnehmen',
-            onPressed: () async {
-              try {
-                await db.nimmSessionWiederAuf(sessionId, isoDatum(jetzt()));
-                navigator.push(MaterialPageRoute(
+        content: const Text('Session beendet.'),
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(
+          label: 'Wieder aufnehmen',
+          onPressed: () async {
+            try {
+              await db.nimmSessionWiederAuf(sessionId, isoDatum(jetzt()));
+              navigator.push(
+                MaterialPageRoute(
                   builder: (_) => LaufendeSessionSeite(
-                      db: db, sessionId: sessionId, jetzt: jetzt),
-                ));
-              } on StateError catch (e) {
-                messenger.showSnackBar(SnackBar(content: Text(e.message)));
-              }
-            },
-          ),
+                    db: db,
+                    sessionId: sessionId,
+                    jetzt: jetzt,
+                  ),
+                ),
+              );
+            } on StateError catch (e) {
+              messenger.showSnackBar(SnackBar(content: Text(e.message)));
+            }
+          },
         ),
+      ),
     });
   }
 
@@ -56,7 +64,9 @@ class LaufendeSessionSeite extends StatelessWidget {
       stream: db.beobachteLaufendeSession(),
       builder: (context, snap) {
         if (!snap.hasData && snap.connectionState != ConnectionState.active) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
         final laufend = snap.data;
         if (laufend == null || laufend.session.id != sessionId) {
@@ -69,8 +79,10 @@ class LaufendeSessionSeite extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Diese Session ist beendet.',
-                        textAlign: TextAlign.center),
+                    const Text(
+                      'Diese Session ist beendet.',
+                      textAlign: TextAlign.center,
+                    ),
                     const SizedBox(height: 16),
                     FilledButton(
                       onPressed: () => Navigator.of(context).pop(),
@@ -88,13 +100,41 @@ class LaufendeSessionSeite extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text('${laufend.standort.name} · ${formatDatum(s.datum)}'),
+            actions: [
+              // WP2.4 [Änderung M2]: Session löschen (z. B. Test-Session)
+              PopupMenuButton<String>(
+                tooltip: 'Menü',
+                onSelected: (_) async {
+                  final navigator = Navigator.of(context);
+                  final anzahl =
+                      (await db.beobachteSaetzeDerSession(sessionId).first)
+                          .length;
+                  if (!context.mounted) return;
+                  final weg = await frageUndLoescheSession(
+                    context,
+                    db: db,
+                    session: s,
+                    standort: laufend.standort.name,
+                    anzahlSaetze: anzahl,
+                  );
+                  if (weg) navigator.pop();
+                },
+                itemBuilder: (_) => const [
+                  PopupMenuItem(
+                    value: 'loeschen',
+                    child: Text('Session löschen'),
+                  ),
+                ],
+              ),
+            ],
           ),
           body: CustomScrollView(
             slivers: [
               _Kacheln(
-                  db: db,
-                  standortId: laufend.standort.id,
-                  sessionId: sessionId),
+                db: db,
+                standortId: laufend.standort.id,
+                sessionId: sessionId,
+              ),
               StreamBuilder<List<SatzMitGeraet>>(
                 stream: db.beobachteSaetzeDerSession(sessionId),
                 builder: (context, satzSnap) {
@@ -113,12 +153,22 @@ class LaufendeSessionSeite extends StatelessWidget {
                             saetze.isEmpty
                                 ? 'Noch keine Sätze – Gerät antippen.'
                                 : 'Heute · ${saetze.length} Sätze'
-                                    '${kw != null ? ' · Körpergewicht ${formatZahl(kw)} kg' : ''}',
+                                      '${kw != null ? ' · Körpergewicht ${formatZahl(kw)} kg' : ''}',
                             style: text.titleSmall,
                           ),
                         );
                       }
-                      return SatzZeile(eintrag: saetze[i - 1]);
+                      // WP2.4: Satz antippen → korrigieren oder löschen
+                      final e = saetze[i - 1];
+                      return SatzZeile(
+                        eintrag: e,
+                        onTap: () => zeigeSatzBearbeiten(
+                          context,
+                          db: db,
+                          satzId: e.satz.id,
+                          heute: s.datum,
+                        ),
+                      );
                     },
                   );
                 },
@@ -133,7 +183,8 @@ class LaufendeSessionSeite extends StatelessWidget {
                 icon: const Icon(Icons.stop),
                 label: const Text('Session beenden'),
                 style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52)),
+                  minimumSize: const Size.fromHeight(52),
+                ),
               ),
             ),
           ),
@@ -145,8 +196,11 @@ class LaufendeSessionSeite extends StatelessWidget {
 
 /// Gerätekacheln des Standorts (WP2.2). Antippen öffnet die Erfassung.
 class _Kacheln extends StatelessWidget {
-  const _Kacheln(
-      {required this.db, required this.standortId, required this.sessionId});
+  const _Kacheln({
+    required this.db,
+    required this.standortId,
+    required this.sessionId,
+  });
 
   final Datenbank db;
   final int standortId;
@@ -164,8 +218,10 @@ class _Kacheln extends StatelessWidget {
           return const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.all(16),
-              child: Text('An diesem Standort gibt es noch keine Geräte. '
-                  'Neue Geräte anlegen folgt mit WP2.5.'),
+              child: Text(
+                'An diesem Standort gibt es noch keine Geräte. '
+                'Neue Geräte anlegen folgt mit WP2.5.',
+              ),
             ),
           );
         }
@@ -190,8 +246,12 @@ class _Kacheln extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12),
-                  onTap: () => zeigeSatzErfassen(context,
-                      db: db, sessionId: sessionId, geraet: g),
+                  onTap: () => zeigeSatzErfassen(
+                    context,
+                    db: db,
+                    sessionId: sessionId,
+                    geraet: g,
+                  ),
                   // [Änderung 0.2.3] Anzahl als Abzeichen in der Ecke; der
                   // Inhalt wird verkleinert statt abgeschnitten.
                   child: Stack(
@@ -206,15 +266,20 @@ class _Kacheln extends StatelessWidget {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(g.kuerzel,
-                                      style: text.titleLarge?.copyWith(
-                                          fontWeight: FontWeight.bold)),
+                                  Text(
+                                    g.kuerzel,
+                                    style: text.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   if (g.funktion != null)
-                                    Text(g.funktion!,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                        style: text.bodySmall),
+                                    Text(
+                                      g.funktion!,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                      style: text.bodySmall,
+                                    ),
                                 ],
                               ),
                             ),
@@ -225,10 +290,13 @@ class _Kacheln extends StatelessWidget {
                         Positioned(
                           top: 4,
                           right: 6,
-                          child: Text('${k.saetzeHeute} ✓',
-                              style: text.labelMedium?.copyWith(
-                                  color: farben.primary,
-                                  fontWeight: FontWeight.bold)),
+                          child: Text(
+                            '${k.saetzeHeute} ✓',
+                            style: text.labelMedium?.copyWith(
+                              color: farben.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                     ],
                   ),

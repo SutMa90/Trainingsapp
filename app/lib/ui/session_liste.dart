@@ -6,6 +6,7 @@ import '../version.dart';
 import 'format.dart';
 import 'laufende_session.dart';
 import 'session_details.dart';
+import 'session_loeschen.dart';
 import 'start_seite.dart';
 
 /// Startseite: „Session starten“ bzw. laufende Session, darunter alle
@@ -55,14 +56,18 @@ class _SessionListeState extends State<SessionListe>
     if (laufend != null && mounted) _oeffneLaufende(laufend.session.id);
   }
 
-  void _oeffneLaufende(int id) => Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) =>
-            LaufendeSessionSeite(db: db, sessionId: id, jetzt: widget.jetzt),
-      ));
+  void _oeffneLaufende(int id) => Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) =>
+          LaufendeSessionSeite(db: db, sessionId: id, jetzt: widget.jetzt),
+    ),
+  );
 
-  void _oeffneStart() => Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => StartSeite(db: db, jetzt: widget.jetzt),
-      ));
+  void _oeffneStart() => Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => StartSeite(db: db, jetzt: widget.jetzt),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -82,8 +87,10 @@ class _SessionListeState extends State<SessionListe>
                   child: ListTile(
                     leading: const Icon(Icons.fitness_center),
                     title: const Text('Laufende Session'),
-                    subtitle: Text('${laufend.standort.name} · '
-                        '${formatDatum(laufend.session.datum)}'),
+                    subtitle: Text(
+                      '${laufend.standort.name} · '
+                      '${formatDatum(laufend.session.datum)}',
+                    ),
                     trailing: FilledButton(
                       onPressed: () => _oeffneLaufende(laufend.session.id),
                       child: const Text('Weiter'),
@@ -95,14 +102,16 @@ class _SessionListeState extends State<SessionListe>
               return Padding(
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
                 child: FilledButton.icon(
-                  onPressed: snap.hasData || snap.connectionState ==
-                          ConnectionState.active
+                  onPressed:
+                      snap.hasData ||
+                          snap.connectionState == ConnectionState.active
                       ? _oeffneStart
                       : null,
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('Session starten'),
                   style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(56)),
+                    minimumSize: const Size.fromHeight(56),
+                  ),
                 ),
               );
             },
@@ -112,7 +121,9 @@ class _SessionListeState extends State<SessionListe>
               stream: db.beobachteSessionUebersicht(),
               builder: (context, snap) {
                 if (snap.hasError) {
-                  return Center(child: Text('Fehler beim Laden: ${snap.error}'));
+                  return Center(
+                    child: Text('Fehler beim Laden: ${snap.error}'),
+                  );
                 }
                 if (!snap.hasData) {
                   return const Center(child: CircularProgressIndicator());
@@ -143,8 +154,10 @@ class _SessionListeState extends State<SessionListe>
                     if (liste.isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 8),
-                        child: Text('${liste.length} Sessions · $summe Sätze',
-                            style: text.bodySmall),
+                        child: Text(
+                          '${liste.length} Sessions · $summe Sätze',
+                          style: text.bodySmall,
+                        ),
                       ),
                   ],
                 );
@@ -155,9 +168,12 @@ class _SessionListeState extends State<SessionListe>
             top: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 2, 12, 8),
-              child: Text('Version $appVersion',
-                  style: text.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              child: Text(
+                'Version $appVersion',
+                style: text.labelSmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
         ],
@@ -169,21 +185,29 @@ class _SessionListeState extends State<SessionListe>
     final laeuft = !e.session.abgeschlossen;
     return ListTile(
       title: Text(formatDatum(e.session.datum)),
-      subtitle: Text(laeuft ? '${e.standort.name} · läuft' : e.standort.name),
+      // [Änderung M2] App-Version bzw. „imp“ (importiert)
+      subtitle: Text(
+        '${e.standort.name} · ${versionText(e.session)}'
+        '${laeuft ? ' · läuft' : ''}',
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('${e.anzahlSaetze} Sätze',
-              style: Theme.of(context).textTheme.bodyLarge),
+          Text(
+            '${e.anzahlSaetze} Sätze',
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
           const Icon(Icons.chevron_right),
         ],
       ),
       onTap: () => laeuft
           ? _oeffneLaufende(e.session.id)
-          : Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) =>
-                  SessionDetails(db: db, uebersicht: e, jetzt: widget.jetzt),
-            )),
+          : Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) =>
+                    SessionDetails(db: db, uebersicht: e, jetzt: widget.jetzt),
+              ),
+            ),
     );
   }
 }

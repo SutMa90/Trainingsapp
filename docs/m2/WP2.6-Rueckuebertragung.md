@@ -34,6 +34,7 @@ Datum (Text `JJJJ-MM-TT`), Ort, Gerät (Kürzel; bei links/rechts `C3-links` / `
 - Eine Session gilt als übertragen, wenn das Log schon Zeilen mit **gleichem Datum + Ort** hat. Die Excel ist selbst der Nachweis; in der App wird nichts vermerkt.
 - Weicht eine bereits übertragene Session ab (z. B. nachträglich in der App korrigiert), wird **nichts geschrieben**, nur im Bericht gemeldet.
 - Bekannte Grenze: Wird eine Session nach der Rückübertragung am selben Tag wieder aufgenommen und ergänzt, fehlen die neuen Sätze in der Excel; der Bericht meldet die Session als abweichend.
+- **[Änderung M2] 14.11.:** Wird eine schon übertragene Session in der App korrigiert oder gelöscht, bleibt sie in der Excel unverändert; der Bericht meldet „abweichend“ bzw. „in der Excel, in der App gelöscht“ (Nutzer OK).
 
 ## Kleinere technische Entscheide (Vorschlag)
 - Nur die neuen Zeilen werden in die Datei geschrieben; alles andere bleibt Byte für Byte gleich (automatischer Test prüft das).

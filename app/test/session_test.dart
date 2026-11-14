@@ -134,7 +134,7 @@ void main() {
     expect(await anzahlSessions(), 1);
   });
 
-  test('Umstellung Version 1 → 2: bestehende Sessions gelten als abgeschlossen',
+  test('Umstellung Version 1 → 3: abgeschlossen, App-Version leer (imp)',
       () async {
     // Zweite, unabhängige Datenbank im Arbeitsspeicher – hier gewollt.
     driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -154,9 +154,34 @@ void main() {
     expect(s.datum, '2025-03-03');
     expect(s.koerpergewichtKg, 78);
     expect(s.abgeschlossen, isTrue);
+    expect(s.appVersion, isNull);
     expect(await alt.laufendeSession(), isNull);
     final version =
         await alt.customSelect('PRAGMA user_version').getSingle();
-    expect(version.read<int>('user_version'), 2);
+    expect(version.read<int>('user_version'), 3);
+  });
+
+  test('Umstellung Version 2 → 3 (Handy): laufende Session bleibt laufend',
+      () async {
+    driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
+    addTearDown(() => driftRuntimeOptions.dontWarnAboutMultipleDatabases = false);
+    final alt = Datenbank(NativeDatabase.memory(setup: (raw) {
+      for (final sql in _v1) {
+        raw.execute(sql);
+      }
+      raw.execute('ALTER TABLE "sessions" ADD COLUMN "abgeschlossen" INTEGER '
+          'NOT NULL DEFAULT 1 CHECK ("abgeschlossen" IN (0, 1))');
+      raw.execute("INSERT INTO standorte (name) VALUES ('Nordstadt')");
+      raw.execute("INSERT INTO sessions (datum, standort_id) VALUES ('2026-08-03', 1)");
+      raw.execute("INSERT INTO sessions (datum, standort_id, abgeschlossen) "
+          "VALUES ('2026-11-13', 1, 0)");
+      raw.execute('PRAGMA user_version = 2');
+    }));
+    addTearDown(alt.close);
+
+    final liste = await alt.select(alt.sessions).get();
+    expect(liste.map((s) => (s.datum, s.abgeschlossen, s.appVersion)),
+        [('2026-08-03', true, null), ('2026-11-13', false, null)]);
+    expect((await alt.laufendeSession())!.session.datum, '2026-11-13');
   });
 }

@@ -335,6 +335,106 @@ extension SatzLogik on Datenbank {
     });
   }
 
+  // ---------------------------------------- WP2.4 Korrigieren / Löschen (F8)
+
+  /// Darf ein Satz dieser Session geändert werden? Nur in Sessions von heute
+  /// (laufend oder heute beendet) – Nutzerentscheid 14.11.2026.
+  Future<void> _pruefeKorrigierbar(int sessionId, String heute) async {
+    final s = await (select(sessions)..where((x) => x.id.equals(sessionId)))
+        .getSingle();
+    if (s.datum != heute) {
+      throw StateError('Nur Sätze von heute lassen sich korrigieren.');
+    }
+  }
+
+  /// Ändert einen Satz. Gewicht kg wird neu berechnet; eine andere Einheit
+  /// wird die Vorgabe des Geräts (R2.1); bei geänderter Seite werden die
+  /// Satz-Nr. neu vergeben (R2.7).
+  Future<void> aendereSatz({
+    required int satzId,
+    required String heute,
+    required int wiederholungen,
+    required double eingabewert,
+    required Einheit einheit,
+    Seite? seite,
+    String? notiz,
+  }) async {
+    if (wiederholungen <= 0) {
+      throw ArgumentError('Wiederholungen müssen grösser als 0 sein.');
+    }
+    if (eingabewert < 0) {
+      throw ArgumentError('Gewicht darf nicht negativ sein.');
+    }
+    await transaction(() async {
+      final alt = await (select(saetze)..where((x) => x.id.equals(satzId)))
+          .getSingle();
+      await _pruefeKorrigierbar(alt.sessionId, heute);
+      final g = await (select(geraete)..where((x) => x.id.equals(alt.geraetId)))
+          .getSingle();
+      final s = await (select(sessions)..where((x) => x.id.equals(alt.sessionId)))
+          .getSingle();
+      if (g.linksRechtsGetrennt && seite == null) {
+        throw ArgumentError('Bei diesem Gerät bitte Seite L oder R wählen.');
+      }
+      if (g.assistiert && s.koerpergewichtKg == null) {
+        throw const KoerpergewichtFehlt();
+      }
+      final neueSeite = g.linksRechtsGetrennt ? seite : null;
+      final text = notiz?.trim();
+      await (update(saetze)..where((x) => x.id.equals(satzId))).write(
+        SaetzeCompanion(
+          wiederholungen: Value(wiederholungen),
+          eingabewert: Value(eingabewert),
+          eingabeeinheit: Value(einheit),
+          seite: Value(neueSeite),
+          gewichtKg: Value(gewichtKgFuerSatz(
+            eingabewert: eingabewert,
+            eingabeeinheit: einheit,
+            assistiert: g.assistiert,
+            koerpergewichtKg: s.koerpergewichtKg,
+          )),
+          notiz: Value(text == null || text.isEmpty ? null : text),
+        ),
+      );
+      if (g.einheit != einheit) {
+        await (update(geraete)..where((x) => x.id.equals(g.id)))
+            .write(GeraeteCompanion(einheit: Value(einheit)));
+      }
+      if (neueSeite != alt.seite) {
+        await nummeriereNeu(alt.sessionId, alt.geraetId);
+      }
+    });
+  }
+
+  /// Löscht einen Satz und nummeriert die übrigen neu (R2.7).
+  Future<void> loescheSatz(int satzId, String heute) {
+    return transaction(() async {
+      final alt = await (select(saetze)..where((x) => x.id.equals(satzId)))
+          .getSingle();
+      await _pruefeKorrigierbar(alt.sessionId, heute);
+      await (delete(saetze)..where((x) => x.id.equals(satzId))).go();
+      await nummeriereNeu(alt.sessionId, alt.geraetId);
+    });
+  }
+
+  /// Satz-Nr. eines Geräts in einer Session lückenlos 1, 2, 3 … pro Seite,
+  /// in Erfassungsreihenfolge (R2.7).
+  Future<void> nummeriereNeu(int sessionId, int geraetId) async {
+    final liste = await (select(saetze)
+          ..where((s) => s.sessionId.equals(sessionId) & s.geraetId.equals(geraetId))
+          ..orderBy([(s) => OrderingTerm.asc(s.id)]))
+        .get();
+    final zaehler = <Seite?, int>{};
+    for (final s in liste) {
+      final nr = (zaehler[s.seite] ?? 0) + 1;
+      zaehler[s.seite] = nr;
+      if (s.satzNr != nr) {
+        await (update(saetze)..where((x) => x.id.equals(s.id)))
+            .write(SaetzeCompanion(satzNr: Value(nr)));
+      }
+    }
+  }
+
   /// Löscht Sätze (z. B. „Rückgängig“ nach „wie letztes Mal“).
   Future<void> loescheSaetze(List<int> ids) =>
       (delete(saetze)..where((s) => s.id.isIn(ids))).go();

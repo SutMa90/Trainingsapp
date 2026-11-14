@@ -19,6 +19,8 @@ Keine Start-/Endzeit in V1 (→ Backlog I-17, relevant mit Cardio).
   - **Eine Session pro Tag und Standort:** Erneuter Start am selben Tag und Ort führt die bestehende Session weiter.
   - Eine Session **ohne Sätze** wird beim Beenden verworfen.
   - Die Rückübertragung (I-21) überträgt nur abgeschlossene Sessions.
+- **[Änderung M2] Feld „App-Version“ (Text, leer erlaubt)** (14.11.2026, Datenbank-Version 3, Prio soll – zumindest in der Testphase): Versionsnummer der App beim **Anlegen** der Session, z. B. `0.2.5`. Leer = importiert, Anzeige „imp“. Wird nicht in die Excel übertragen.
+- **[Änderung M2] Session löschen** (14.11.2026, Prio muss): nur von der App erzeugte Sessions; importierte („imp“) sind geschützt, bis der Nutzer das widerruft. Löscht die Sätze der Session mit.
 
 **R1.5 Satz** – Session, Gerät, Satz-Nr., Seite (L/R/leer), Wiederholungen, Eingabewert + Eingabeeinheit (Original), Gewicht kg (berechnet), Notiz. Kein RPE in V1.
 

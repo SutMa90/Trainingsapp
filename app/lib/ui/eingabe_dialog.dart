@@ -63,16 +63,20 @@ class _EingabeDialogState extends State<_EingabeDialog> {
         keyboardType: widget.tastatur,
         textCapitalization: widget.grossschreibung,
         decoration: InputDecoration(
-            labelText: widget.label, helperText: widget.hinweis),
+          labelText: widget.label,
+          helperText: widget.hinweis,
+        ),
         onSubmitted: (t) => Navigator.pop(context, t),
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Abbrechen')),
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Abbrechen'),
+        ),
         FilledButton(
-            onPressed: () => Navigator.pop(context, _eingabe.text),
-            child: Text(widget.okText)),
+          onPressed: () => Navigator.pop(context, _eingabe.text),
+          child: Text(widget.okText),
+        ),
       ],
     );
   }

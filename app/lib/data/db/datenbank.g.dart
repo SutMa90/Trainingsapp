@@ -1364,6 +1364,17 @@ class $SessionsTable extends Sessions
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _appVersionMeta = const VerificationMeta(
+    'appVersion',
+  );
+  @override
+  late final GeneratedColumn<String> appVersion = GeneratedColumn<String>(
+    'app_version',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1371,6 +1382,7 @@ class $SessionsTable extends Sessions
     standortId,
     koerpergewichtKg,
     abgeschlossen,
+    appVersion,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1421,6 +1433,12 @@ class $SessionsTable extends Sessions
         ),
       );
     }
+    if (data.containsKey('app_version')) {
+      context.handle(
+        _appVersionMeta,
+        appVersion.isAcceptableOrUnknown(data['app_version']!, _appVersionMeta),
+      );
+    }
     return context;
   }
 
@@ -1450,6 +1468,10 @@ class $SessionsTable extends Sessions
         DriftSqlType.bool,
         data['${effectivePrefix}abgeschlossen'],
       )!,
+      appVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}app_version'],
+      ),
     );
   }
 
@@ -1472,12 +1494,17 @@ class TrainingsSession extends DataClass
   /// Importierte Sessions gelten als abgeschlossen (Vorgabe ja); die App legt
   /// neue Sessions ausdrücklich mit „nein“ an. Regeln: DATENMODELL R1.4.
   final bool abgeschlossen;
+
+  /// [Änderung M2] Datenbank-Version 3: App-Version beim Anlegen der Session,
+  /// z. B. `0.2.5`. Leer = importiert (Anzeige „imp“).
+  final String? appVersion;
   const TrainingsSession({
     required this.id,
     required this.datum,
     required this.standortId,
     this.koerpergewichtKg,
     required this.abgeschlossen,
+    this.appVersion,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1489,6 +1516,9 @@ class TrainingsSession extends DataClass
       map['koerpergewicht_kg'] = Variable<double>(koerpergewichtKg);
     }
     map['abgeschlossen'] = Variable<bool>(abgeschlossen);
+    if (!nullToAbsent || appVersion != null) {
+      map['app_version'] = Variable<String>(appVersion);
+    }
     return map;
   }
 
@@ -1501,6 +1531,9 @@ class TrainingsSession extends DataClass
           ? const Value.absent()
           : Value(koerpergewichtKg),
       abgeschlossen: Value(abgeschlossen),
+      appVersion: appVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(appVersion),
     );
   }
 
@@ -1515,6 +1548,7 @@ class TrainingsSession extends DataClass
       standortId: serializer.fromJson<int>(json['standortId']),
       koerpergewichtKg: serializer.fromJson<double?>(json['koerpergewichtKg']),
       abgeschlossen: serializer.fromJson<bool>(json['abgeschlossen']),
+      appVersion: serializer.fromJson<String?>(json['appVersion']),
     );
   }
   @override
@@ -1526,6 +1560,7 @@ class TrainingsSession extends DataClass
       'standortId': serializer.toJson<int>(standortId),
       'koerpergewichtKg': serializer.toJson<double?>(koerpergewichtKg),
       'abgeschlossen': serializer.toJson<bool>(abgeschlossen),
+      'appVersion': serializer.toJson<String?>(appVersion),
     };
   }
 
@@ -1535,6 +1570,7 @@ class TrainingsSession extends DataClass
     int? standortId,
     Value<double?> koerpergewichtKg = const Value.absent(),
     bool? abgeschlossen,
+    Value<String?> appVersion = const Value.absent(),
   }) => TrainingsSession(
     id: id ?? this.id,
     datum: datum ?? this.datum,
@@ -1543,6 +1579,7 @@ class TrainingsSession extends DataClass
         ? koerpergewichtKg.value
         : this.koerpergewichtKg,
     abgeschlossen: abgeschlossen ?? this.abgeschlossen,
+    appVersion: appVersion.present ? appVersion.value : this.appVersion,
   );
   TrainingsSession copyWithCompanion(SessionsCompanion data) {
     return TrainingsSession(
@@ -1557,6 +1594,9 @@ class TrainingsSession extends DataClass
       abgeschlossen: data.abgeschlossen.present
           ? data.abgeschlossen.value
           : this.abgeschlossen,
+      appVersion: data.appVersion.present
+          ? data.appVersion.value
+          : this.appVersion,
     );
   }
 
@@ -1567,14 +1607,21 @@ class TrainingsSession extends DataClass
           ..write('datum: $datum, ')
           ..write('standortId: $standortId, ')
           ..write('koerpergewichtKg: $koerpergewichtKg, ')
-          ..write('abgeschlossen: $abgeschlossen')
+          ..write('abgeschlossen: $abgeschlossen, ')
+          ..write('appVersion: $appVersion')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, datum, standortId, koerpergewichtKg, abgeschlossen);
+  int get hashCode => Object.hash(
+    id,
+    datum,
+    standortId,
+    koerpergewichtKg,
+    abgeschlossen,
+    appVersion,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1583,7 +1630,8 @@ class TrainingsSession extends DataClass
           other.datum == this.datum &&
           other.standortId == this.standortId &&
           other.koerpergewichtKg == this.koerpergewichtKg &&
-          other.abgeschlossen == this.abgeschlossen);
+          other.abgeschlossen == this.abgeschlossen &&
+          other.appVersion == this.appVersion);
 }
 
 class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
@@ -1592,12 +1640,14 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
   final Value<int> standortId;
   final Value<double?> koerpergewichtKg;
   final Value<bool> abgeschlossen;
+  final Value<String?> appVersion;
   const SessionsCompanion({
     this.id = const Value.absent(),
     this.datum = const Value.absent(),
     this.standortId = const Value.absent(),
     this.koerpergewichtKg = const Value.absent(),
     this.abgeschlossen = const Value.absent(),
+    this.appVersion = const Value.absent(),
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -1605,6 +1655,7 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
     required int standortId,
     this.koerpergewichtKg = const Value.absent(),
     this.abgeschlossen = const Value.absent(),
+    this.appVersion = const Value.absent(),
   }) : datum = Value(datum),
        standortId = Value(standortId);
   static Insertable<TrainingsSession> custom({
@@ -1613,6 +1664,7 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
     Expression<int>? standortId,
     Expression<double>? koerpergewichtKg,
     Expression<bool>? abgeschlossen,
+    Expression<String>? appVersion,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1620,6 +1672,7 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
       if (standortId != null) 'standort_id': standortId,
       if (koerpergewichtKg != null) 'koerpergewicht_kg': koerpergewichtKg,
       if (abgeschlossen != null) 'abgeschlossen': abgeschlossen,
+      if (appVersion != null) 'app_version': appVersion,
     });
   }
 
@@ -1629,6 +1682,7 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
     Value<int>? standortId,
     Value<double?>? koerpergewichtKg,
     Value<bool>? abgeschlossen,
+    Value<String?>? appVersion,
   }) {
     return SessionsCompanion(
       id: id ?? this.id,
@@ -1636,6 +1690,7 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
       standortId: standortId ?? this.standortId,
       koerpergewichtKg: koerpergewichtKg ?? this.koerpergewichtKg,
       abgeschlossen: abgeschlossen ?? this.abgeschlossen,
+      appVersion: appVersion ?? this.appVersion,
     );
   }
 
@@ -1657,6 +1712,9 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
     if (abgeschlossen.present) {
       map['abgeschlossen'] = Variable<bool>(abgeschlossen.value);
     }
+    if (appVersion.present) {
+      map['app_version'] = Variable<String>(appVersion.value);
+    }
     return map;
   }
 
@@ -1667,7 +1725,8 @@ class SessionsCompanion extends UpdateCompanion<TrainingsSession> {
           ..write('datum: $datum, ')
           ..write('standortId: $standortId, ')
           ..write('koerpergewichtKg: $koerpergewichtKg, ')
-          ..write('abgeschlossen: $abgeschlossen')
+          ..write('abgeschlossen: $abgeschlossen, ')
+          ..write('appVersion: $appVersion')
           ..write(')'))
         .toString();
   }
@@ -3608,6 +3667,7 @@ typedef $$SessionsTableCreateCompanionBuilder =
       required int standortId,
       Value<double?> koerpergewichtKg,
       Value<bool> abgeschlossen,
+      Value<String?> appVersion,
     });
 typedef $$SessionsTableUpdateCompanionBuilder =
     SessionsCompanion Function({
@@ -3616,6 +3676,7 @@ typedef $$SessionsTableUpdateCompanionBuilder =
       Value<int> standortId,
       Value<double?> koerpergewichtKg,
       Value<bool> abgeschlossen,
+      Value<String?> appVersion,
     });
 
 final class $$SessionsTableReferences
@@ -3685,6 +3746,11 @@ class $$SessionsTableFilterComposer
 
   ColumnFilters<bool> get abgeschlossen => $composableBuilder(
     column: $table.abgeschlossen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3766,6 +3832,11 @@ class $$SessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$StandorteTableOrderingComposer get standortId {
     final $$StandorteTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3812,6 +3883,11 @@ class $$SessionsTableAnnotationComposer
 
   GeneratedColumn<bool> get abgeschlossen => $composableBuilder(
     column: $table.abgeschlossen,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get appVersion => $composableBuilder(
+    column: $table.appVersion,
     builder: (column) => column,
   );
 
@@ -3897,12 +3973,14 @@ class $$SessionsTableTableManager
                 Value<int> standortId = const Value.absent(),
                 Value<double?> koerpergewichtKg = const Value.absent(),
                 Value<bool> abgeschlossen = const Value.absent(),
+                Value<String?> appVersion = const Value.absent(),
               }) => SessionsCompanion(
                 id: id,
                 datum: datum,
                 standortId: standortId,
                 koerpergewichtKg: koerpergewichtKg,
                 abgeschlossen: abgeschlossen,
+                appVersion: appVersion,
               ),
           createCompanionCallback:
               ({
@@ -3911,12 +3989,14 @@ class $$SessionsTableTableManager
                 required int standortId,
                 Value<double?> koerpergewichtKg = const Value.absent(),
                 Value<bool> abgeschlossen = const Value.absent(),
+                Value<String?> appVersion = const Value.absent(),
               }) => SessionsCompanion.insert(
                 id: id,
                 datum: datum,
                 standortId: standortId,
                 koerpergewichtKg: koerpergewichtKg,
                 abgeschlossen: abgeschlossen,
+                appVersion: appVersion,
               ),
           withReferenceMapper: (p0) => p0
               .map(

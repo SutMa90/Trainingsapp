@@ -42,7 +42,8 @@ class _StartSeiteState extends State<StartSeite> {
     setState(() {
       final ersterAufruf = _vorschlag == null;
       _vorschlag = v;
-      _standortId = auswahl ??
+      _standortId =
+          auswahl ??
           _standortId ??
           v.letzterStandortId ??
           (v.standorte.length == 1 ? v.standorte.first.id : null);
@@ -61,8 +62,9 @@ class _StartSeiteState extends State<StartSeite> {
       grossschreibung: TextCapitalization.words,
     );
     if (name == null || name.trim().isEmpty) return;
-    final vorhanden = _vorschlag!.standorte
-        .where((s) => s.name.toLowerCase() == name.trim().toLowerCase());
+    final vorhanden = _vorschlag!.standorte.where(
+      (s) => s.name.toLowerCase() == name.trim().toLowerCase(),
+    );
     if (vorhanden.isNotEmpty) {
       await _lade(auswahl: vorhanden.first.id);
       return;
@@ -82,20 +84,28 @@ class _StartSeiteState extends State<StartSeite> {
     final heute = isoDatum(widget.jetzt());
     try {
       final id = await widget.db.starteSession(
-          standortId: _standortId!, heute: heute, koerpergewichtKg: kg);
+        standortId: _standortId!,
+        heute: heute,
+        koerpergewichtKg: kg,
+      );
       if (!mounted) return;
-      await Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (_) => LaufendeSessionSeite(
-            db: widget.db, sessionId: id, jetzt: widget.jetzt),
-      ));
+      await Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => LaufendeSessionSeite(
+            db: widget.db,
+            sessionId: id,
+            jetzt: widget.jetzt,
+          ),
+        ),
+      );
     } on StateError catch (e) {
       setState(() => _laeuft = false);
       _meldung(e.message);
     }
   }
 
-  void _meldung(String text) => ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text(text)));
+  void _meldung(String text) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
   @override
   Widget build(BuildContext context) {
@@ -110,8 +120,10 @@ class _StartSeiteState extends State<StartSeite> {
               children: [
                 Text('Datum', style: text.labelLarge),
                 const SizedBox(height: 4),
-                Text('Heute, ${formatDatum(isoDatum(widget.jetzt()))}',
-                    style: text.titleMedium),
+                Text(
+                  'Heute, ${formatDatum(isoDatum(widget.jetzt()))}',
+                  style: text.titleMedium,
+                ),
                 const SizedBox(height: 24),
                 Text('Standort', style: text.labelLarge),
                 const SizedBox(height: 8),
@@ -135,11 +147,13 @@ class _StartSeiteState extends State<StartSeite> {
                 const SizedBox(height: 24),
                 TextField(
                   controller: _gewicht,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Körpergewicht (kg)',
-                    helperText: 'Für assistierte Geräte; vom letzten Mal übernommen',
+                    helperText:
+                        'Für assistierte Geräte; vom letzten Mal übernommen',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -149,7 +163,8 @@ class _StartSeiteState extends State<StartSeite> {
                   icon: const Icon(Icons.play_arrow),
                   label: const Text('Starten'),
                   style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(56)),
+                    minimumSize: const Size.fromHeight(56),
+                  ),
                 ),
               ],
             ),

@@ -31,8 +31,9 @@ class Datenbank extends _$Datenbank {
   /// Version 1 = Datenmodell V1. Jede Strukturänderung erhöht die Version
   /// und bekommt einen Migrationsschritt (siehe [migration]).
   /// Version 2 [Änderung M2]: Session.abgeschlossen.
+  /// Version 3 [Änderung M2]: Session.appVersion.
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -44,6 +45,10 @@ class Datenbank extends _$Datenbank {
           if (von < 2) {
             // Bestehende Sessions (Import) bekommen die Vorgabe „abgeschlossen“.
             await m.addColumn(sessions, sessions.abgeschlossen);
+          }
+          if (von < 3) {
+            // Bestehende Sessions: Version unbekannt → leer (Anzeige „imp“).
+            await m.addColumn(sessions, sessions.appVersion);
           }
         },
         beforeOpen: (details) async {

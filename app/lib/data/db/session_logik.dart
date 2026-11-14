@@ -4,6 +4,7 @@
 
 import 'package:drift/drift.dart';
 
+import '../../version.dart';
 import 'datenbank.dart';
 
 /// Kalendertag als Text `JJJJ-MM-TT` (Ortszeit).
@@ -112,10 +113,13 @@ extension SessionLogik on Datenbank {
   /// Gibt es heute am selben Standort schon eine Session, wird sie
   /// weitergeführt (eine Session pro Tag und Standort). Läuft bereits eine
   /// andere Session, wird nichts geändert ([StateError]).
+  ///
+  /// [Änderung M2] Eine neue Session merkt sich die App-Version ([version]).
   Future<int> starteSession({
     required int standortId,
     required String heute,
     double? koerpergewichtKg,
+    String version = appVersion,
   }) {
     return transaction(() async {
       final laufend = await (select(sessions)
@@ -147,6 +151,7 @@ extension SessionLogik on Datenbank {
         standortId: standortId,
         koerpergewichtKg: Value(koerpergewichtKg),
         abgeschlossen: const Value(false),
+        appVersion: Value(version),
       ));
     });
   }
@@ -172,6 +177,20 @@ extension SessionLogik on Datenbank {
       }
       await (update(sessions)..where((x) => x.id.equals(id)))
           .write(const SessionsCompanion(abgeschlossen: Value(false)));
+    });
+  }
+
+  /// [Änderung M2] Löscht eine von der App erzeugte Session samt Sätzen.
+  /// Importierte Sessions (ohne App-Version) sind geschützt ([StateError]).
+  Future<void> loescheSession(int id) {
+    return transaction(() async {
+      final s = await (select(sessions)..where((x) => x.id.equals(id)))
+          .getSingle();
+      if (s.appVersion == null) {
+        throw StateError('Importierte Sessions sind geschützt.');
+      }
+      await (delete(saetze)..where((x) => x.sessionId.equals(id))).go();
+      await (delete(sessions)..where((x) => x.id.equals(id))).go();
     });
   }
 

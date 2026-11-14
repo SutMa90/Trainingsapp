@@ -7,6 +7,7 @@ import '../data/db/datenbank.dart';
 import '../data/db/satz_logik.dart';
 import 'eingabe_dialog.dart';
 import 'format.dart';
+import 'satz_bearbeiten.dart';
 
 /// Öffnet das Erfassungsfenster für ein Gerät (WP2.2, F5/F6).
 /// Das Fenster bleibt nach dem Speichern offen, damit der nächste Satz
@@ -365,7 +366,7 @@ class _SatzErfassenState extends State<SatzErfassen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _Zahlenfeld(
+              child: Zahlenfeld(
                 controller: _wdh,
                 label: 'Wdh',
                 dezimal: false,
@@ -375,7 +376,7 @@ class _SatzErfassenState extends State<SatzErfassen> {
             const SizedBox(width: 12),
             Expanded(
               flex: 2,
-              child: _Zahlenfeld(
+              child: Zahlenfeld(
                 controller: _gewicht,
                 label: g.assistiert ? 'Unterstützung' : 'Gewicht',
                 dezimal: true,
@@ -458,14 +459,17 @@ class _SatzErfassenState extends State<SatzErfassen> {
           db: widget.db,
           sessionId: widget.sessionId,
           geraetId: g.id,
+          heute: _heuteDatum!,
+          onGeaendert: _lade,
         ),
       ],
     );
   }
 }
 
-class _Zahlenfeld extends StatelessWidget {
-  const _Zahlenfeld({
+class Zahlenfeld extends StatelessWidget {
+  const Zahlenfeld({
+    super.key,
     required this.controller,
     required this.label,
     required this.dezimal,
@@ -510,11 +514,15 @@ class _HeuteAmGeraet extends StatelessWidget {
     required this.db,
     required this.sessionId,
     required this.geraetId,
+    required this.heute,
+    required this.onGeaendert,
   });
 
   final Datenbank db;
   final int sessionId;
   final int geraetId;
+  final String heute;
+  final VoidCallback onGeaendert;
 
   @override
   Widget build(BuildContext context) {
@@ -529,12 +537,34 @@ class _HeuteAmGeraet extends StatelessWidget {
           children: [
             Text('Heute an diesem Gerät', style: text.labelLarge),
             const SizedBox(height: 4),
+            // WP2.4: Antippen → Satz korrigieren oder löschen
             for (final s in saetze)
-              Text(
-                'Satz ${s.satzNr}${s.seite == null ? '' : ' ${s.seite!.name}'}: '
-                '${s.wiederholungen} × ${formatZahl(s.eingabewert)} ${s.eingabeeinheit.name}'
-                '${s.notiz == null ? '' : ' · ${s.notiz}'}',
-                style: text.bodyMedium,
+              InkWell(
+                onTap: () async {
+                  final geaendert = await zeigeSatzBearbeiten(
+                    context,
+                    db: db,
+                    satzId: s.id,
+                    heute: heute,
+                  );
+                  if (geaendert) onGeaendert();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Satz ${s.satzNr}${s.seite == null ? '' : ' ${s.seite!.name}'}: '
+                          '${s.wiederholungen} × ${formatZahl(s.eingabewert)} ${s.eingabeeinheit.name}'
+                          '${s.notiz == null ? '' : ' · ${s.notiz}'}',
+                          style: text.bodyMedium,
+                        ),
+                      ),
+                      const Icon(Icons.edit_outlined, size: 18),
+                    ],
+                  ),
+                ),
               ),
           ],
         );
