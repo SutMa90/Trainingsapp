@@ -185,6 +185,28 @@ class _GeraetFormularState extends State<GeraetFormular> {
     }
   }
 
+  String get _saetzeText =>
+      _anzahlSaetze == 1 ? '1 Satz' : '$_anzahlSaetze Sätze';
+
+  Future<void> _nichtLoeschbar() => showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Löschen nicht möglich'),
+      content: Text(
+        '${widget.geraet!.kuerzel} hat $_saetzeText. Geräte mit Sätzen '
+        'bleiben, damit die Sätze erhalten bleiben.\n\n'
+        'Sätze von heute kannst du in der Session antippen und löschen – '
+        'danach lässt sich das Gerät löschen.',
+      ),
+      actions: [
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
+
   Future<void> _loesche() async {
     final g = widget.geraet!;
     final ja = await showDialog<bool>(
@@ -225,11 +247,13 @@ class _GeraetFormularState extends State<GeraetFormular> {
       appBar: AppBar(
         title: Text(_neu ? 'Neues Gerät' : 'Gerät ${widget.geraet!.kuerzel}'),
         actions: [
-          if (!_neu && _anzahlSaetze == 0)
+          // [Änderung 0.2.7] Knopf immer sichtbar; bei Geräten mit Sätzen
+          // erklärt er, warum Löschen nicht geht (Handy-Test 14.11.).
+          if (!_neu)
             IconButton(
               tooltip: 'Gerät löschen',
               icon: const Icon(Icons.delete_outline),
-              onPressed: _loesche,
+              onPressed: _anzahlSaetze == 0 ? _loesche : _nichtLoeschbar,
             ),
         ],
       ),
@@ -337,8 +361,8 @@ class _GeraetFormularState extends State<GeraetFormular> {
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Text(
-                        'Änderungen gelten für neue Sätze. Die $_anzahlSaetze '
-                        'bisherigen Sätze bleiben unverändert.',
+                        'Änderungen gelten für neue Sätze. Bisher: '
+                        '$_saetzeText – bleibt unverändert.',
                         style: text.bodySmall?.copyWith(color: grau),
                       ),
                     ),

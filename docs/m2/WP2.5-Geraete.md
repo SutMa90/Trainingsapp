@@ -1,6 +1,6 @@
 # WP2.5 – Geräteverwaltung und neues Gerät (F3), Datenpflege I-19
 
-Stand: 14.11.2026 · Status: 🔄 gebaut (0.2.6), Abnahme am Handy offen
+Stand: 14.11.2026 · Status: 🔄 0.2.7 (Korrektur Löschknopf), Abnahme am Handy offen
 
 **Abnahmekriterium:** Neues Gerät in ≤ 30 s angelegt und sofort als Kachel da; der Nutzer hat T1/T2/C3 (Muskelgruppe), D1 Dielsdorf (Vorgabe-Einheit) und B3/C1 Grüze (Funktion) selbst in der App nachgetragen.
 
@@ -48,4 +48,10 @@ Grundlage: `DATENMODELL.md` R1.2, R1.3, R1.6, R2.2, R2.4. Keine neue Datenbank-V
 ## Ergebnis
 - `flutter test`: 70 von 70 grün (Zeitlimit pro Test, Handy-Simulation 360 × 780 mit Android-Tasten und Schrift 130 %, verfehlte Tipps lassen Tests scheitern). `flutter analyze`: keine Befunde.
 - Der Oberflächentest fand, dass Felder weiter unten im Formular bei grosser Schrift noch nicht aufgebaut waren (Liste baut nur Sichtbares) – Formular baut jetzt alle Felder.
-- Handy 0.2.6: offen.
+- Handy 0.2.6 (14.11.): Name „Gymi“ ok; neues Gerät per „＋ Neu“ in ≤ 30 s mit Kachel ok; Vorschläge Hersteller ok; Geräteliste ok.
+  Befund: Löschknopf nicht gefunden. Ursache: Das Testgerät hatte schon 2 Sätze – dann blendete die App den Knopf ohne Erklärung aus.
+
+## [Änderung 0.2.7] Korrektur nach dem Handy-Test
+- **Löschknopf 🗑 immer sichtbar** bei bestehenden Geräten. Hat das Gerät Sätze, erklärt ein Hinweis, warum Löschen nicht geht, und wie es trotzdem geht: Sätze von heute in der Session antippen und löschen, danach das Gerät löschen.
+- Hinweis im Formular in Einzahl/Mehrzahl („Bisher: 1 Satz – bleibt unverändert“).
+- `flutter test`: 70 von 70 grün, Oberflächentest prüft den Hinweis.

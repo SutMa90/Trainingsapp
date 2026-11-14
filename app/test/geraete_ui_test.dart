@@ -155,9 +155,14 @@ void main() {
     await warte();
     expect(find.text('Gerät A2'), findsOneWidget);
     expect(find.textContaining('Kürzel bleibt'), findsOneWidget);
-    expect(find.textContaining('Die 1 bisherigen Sätze bleiben unverändert'),
+    expect(find.textContaining('Bisher: 1 Satz – bleibt unverändert'),
         findsOneWidget);
-    expect(find.byTooltip('Gerät löschen'), findsNothing);
+    // [Änderung 0.2.7] Löschknopf sichtbar, erklärt bei Sätzen das Warum
+    await tippe(find.byTooltip('Gerät löschen'));
+    expect(find.text('Löschen nicht möglich'), findsOneWidget);
+    expect(find.textContaining('A2 hat 1 Satz.'), findsOneWidget);
+    await tippe(find.text('OK'));
+    expect(find.text('Löschen nicht möglich'), findsNothing);
     final kuerzelFeld =
         tester.widget<TextField>(find.widgetWithText(TextField, 'Kürzel'));
     expect(kuerzelFeld.readOnly, isTrue);
