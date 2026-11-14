@@ -1,8 +1,9 @@
 # WP2.5 – Geräteverwaltung und neues Gerät (F3), Datenpflege I-19
 
-Stand: 14.11.2026 · Status: 🔄 0.2.8 (Hinweis „Wieder aufnehmen“), Abnahme am Handy offen
+Stand: 14.11.2026 · Status: ✅ abgenommen (0.2.8)
 
-**Abnahmekriterium:** Neues Gerät in ≤ 30 s angelegt und sofort als Kachel da; der Nutzer hat T1/T2/C3 (Muskelgruppe), D1 Dielsdorf (Vorgabe-Einheit) und B3/C1 Grüze (Funktion) selbst in der App nachgetragen.
+**Abnahmekriterium:** Neues Gerät in ≤ 30 s angelegt und sofort als Kachel da. ~~Der Nutzer hat T1/T2/C3 (Muskelgruppe), D1 Dielsdorf (Vorgabe-Einheit) und B3/C1 Grüze (Funktion) selbst in der App nachgetragen.~~
+**[Änderung M2] 14.11.:** Die Datenpflege I-19 macht der Nutzer in den ersten echten Sessions am jeweiligen Ort – nach dem Umstieg (WP2.7), also nur einmal. Sie ist jetzt Teil der Abnahme von WP2.8 (Nutzer OK).
 
 Grundlage: `DATENMODELL.md` R1.2, R1.3, R1.6, R2.2, R2.4. Keine neue Datenbank-Version: Die Tabelle Geräte hat schon alle Felder.
 
@@ -61,3 +62,4 @@ Grundlage: `DATENMODELL.md` R1.2, R1.3, R1.6, R2.2, R2.4. Keine neue Datenbank-V
 - Beim Öffnen von ⋮ → „Geräte“ verschwindet der Hinweis (Vorschlag). Wieder aufnehmen geht am selben Tag weiter über die Session in der Liste („Session wieder aufnehmen“).
 - Oberflächentest: Session beenden → Geräte → kein Hinweis, letztes Gerät und Speicherknopf im Formular frei. (Die Startseite mit dem Hinweis wird im Test mit Schrift 100 % geprüft: Die Testschrift zeichnet jeden Buchstaben als Quadrat, „Wieder aufnehmen“ wäre bei 130 % breiter als der Bildschirm – am Handy passt es.)
 - `flutter test`: 70 von 70 grün.
+- Handy 0.2.8 (14.11.): Hinweis erscheint nicht mehr in der Geräteverwaltung; Nutzer: „beides ok“. ✅ WP2.5 abgenommen.
