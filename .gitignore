@@ -67,3 +67,6 @@ desktop.ini
 
 # Sicherungen der Rückübertragung (echte Daten)
 Sicherungen/
+
+# Einmalige Wartungsskripte (nicht ins Repo)
+app/tool/_tmp/

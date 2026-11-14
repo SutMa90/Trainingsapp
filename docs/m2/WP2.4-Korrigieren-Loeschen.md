@@ -43,3 +43,4 @@ Stand: 14.11.2026 · Status: ✅ abgenommen (0.2.5)
 - `flutter test`: 60 von 60 grün (Zeitlimit pro Test). `flutter analyze`: keine Befunde. Android-Debug-Build erfolgreich.
 - Handy 0.2.5 (14.11.): DB-Umstellung 2 → 3 ohne Verlust; Satz ändern/löschen, Session löschen, „imp“-Schutz vom Nutzer geprüft – „alles passt“. ✅
 - Befund: Die beiden Test-Sessions vom 13.11. (vor 0.2.5 erzeugt) zeigen „imp“ und sind dadurch geschützt. Nutzerauftrag 14.11.: vor der nächsten Installation direkt in der Handy-Datenbank löschen (mit Sicherung vorher).
+- Erledigt 14.11.: Handy-Datenbank gesichert (`Sicherungen/`, nicht im Repo), die zwei Test-Sessions vom 13.11. (5 + 6 Sätze) mit einem einmaligen Wartungsskript gelöscht (bricht ab, wenn nicht genau diese zwei gefunden werden), Datei zurückgespielt und per Prüfsumme kontrolliert. Handy: 13 Sessions · 276 Sätze; 31 Geräte unverändert gegenüber dem Import. Skript danach entfernt.
