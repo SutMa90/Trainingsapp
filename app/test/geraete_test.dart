@@ -1,7 +1,6 @@
 // WP2.5: Geräteverwaltung – anlegen, ändern, löschen, Vorschläge (R2.2),
 // Muskelgruppen erweitern (R2.4).
 
-import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:trainingsapp/data/db/datenbank.dart';

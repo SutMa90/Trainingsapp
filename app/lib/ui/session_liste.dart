@@ -4,6 +4,7 @@ import '../data/db/datenbank.dart';
 import '../data/db/session_logik.dart';
 import '../version.dart';
 import 'format.dart';
+import 'geraete_verwaltung.dart';
 import 'laufende_session.dart';
 import 'session_details.dart';
 import 'session_loeschen.dart';
@@ -73,7 +74,21 @@ class _SessionListeState extends State<SessionListe>
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Gymi')),
+      appBar: AppBar(
+        title: const Text('Gymi'),
+        actions: [
+          // WP2.5: Geräteverwaltung
+          PopupMenuButton<String>(
+            tooltip: 'Menü',
+            onSelected: (_) => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => GeraeteVerwaltung(db: db)),
+            ),
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'geraete', child: Text('Geräte')),
+            ],
+          ),
+        ],
+      ),
       body: Column(
         children: [
           StreamBuilder<LaufendeSession?>(
