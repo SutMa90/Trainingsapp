@@ -1,6 +1,6 @@
 # WP2.4 – Sätze korrigieren und löschen (F8), Session löschen, App-Version
 
-Stand: 14.11.2026 · Status: umgesetzt (0.2.5), Test am Handy offen
+Stand: 14.11.2026 · Status: ✅ abgenommen (0.2.5)
 
 **Abnahmekriterium:** Satz ändern und löschen am Handy; nach dem Löschen Satz-Nr. lückenlos (R2.7); [Änderung M2] Test-Session löschen am Handy, importierte Session nicht löschbar; Liste zeigt App-Version bzw. „imp“; Tests grün.
 
@@ -41,4 +41,5 @@ Stand: 14.11.2026 · Status: umgesetzt (0.2.5), Test am Handy offen
 
 ## Ergebnis
 - `flutter test`: 60 von 60 grün (Zeitlimit pro Test). `flutter analyze`: keine Befunde. Android-Debug-Build erfolgreich.
-- Handy: offen.
+- Handy 0.2.5 (14.11.): DB-Umstellung 2 → 3 ohne Verlust; Satz ändern/löschen, Session löschen, „imp“-Schutz vom Nutzer geprüft – „alles passt“. ✅
+- Befund: Die beiden Test-Sessions vom 13.11. (vor 0.2.5 erzeugt) zeigen „imp“ und sind dadurch geschützt. Nutzerauftrag 14.11.: vor der nächsten Installation direkt in der Handy-Datenbank löschen (mit Sicherung vorher).
