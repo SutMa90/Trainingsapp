@@ -16,6 +16,8 @@ Begriffe, wie sie in App, Doku und Code verwendet werden. Neue Begriffe werden l
 | **Vorgabe-Einheit** | Einheit eines Geräts, mit der neue Sätze vorbelegt werden. Umschaltbar, ändert alte Sätze nicht. |
 | **assistiert** | Geräteeigenschaft: Das Gerät nimmt Gewicht ab (z. B. assistierte Klimmzüge). Effektives Gewicht = Körpergewicht − Eingabe. |
 | **links/rechts getrennt** | Geräteeigenschaft: Sätze werden pro Seite (L/R) gezählt. |
+| **Geräteverwaltung** | Liste der Geräte pro Standort (Startseite ⋮ → „Geräte“); Gerät antippen = bearbeiten, „Neues Gerät“ legt eines an (WP2.5). |
+| **Kurzformular** | Formular „Neues Gerät“ / „Gerät bearbeiten“: Kürzel, Funktion, Muskelgruppe, Einheit, assistiert, links/rechts; weitere Angaben unter „Mehr“ (WP2.5). |
 | **Muskelgruppe** | Hauptmuskelgruppe eines Geräts aus einer erweiterbaren Liste (R2.4). |
 | **Umwandlungsskript** | Einmaliges Programm auf dem PC, das die Trainings-Excel in die Startdatenbank umwandelt. Nicht Teil der App. |
 | **Startdatenbank** | Vom Umwandlungsskript erzeugte Datenbankdatei, die die App beim allerersten Start übernimmt. Nie im Repository. |

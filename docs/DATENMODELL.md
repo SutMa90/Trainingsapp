@@ -26,6 +26,7 @@ Keine Start-/Endzeit in V1 (→ Backlog I-17, relevant mit Cardio).
 
 **R1.6 Gerätebezug und Korrekturen** – Satz verweist intern auf das Gerät, nicht auf das Kürzel.
 - Umbenennen wirkt auch auf die Anzeige alter Sätze.
+- **[Änderung M2] Umbenennen und Löschen** (14.11.2026, WP2.5): Kürzel umbenennen und Gerät löschen nur, solange das Gerät **keine Sätze** hat. Grund: Die Excel führt das Kürzel in jeder Log-Zeile; ein umbenanntes Kürzel würde nach der Rückübertragung (WP2.6) beim erneuten Import zu zwei Geräten. Alle anderen Angaben (Funktion, Muskelgruppe, Hersteller, Modell, Einheit, assistiert, links/rechts, Einstellungen, Notiz) bleiben jederzeit änderbar und gelten nur für neue Sätze.
 - Verwechslung (z. B. E1/E2) → neues Gerät anlegen; alte Logs bleiben unverändert.
 - **Einheit jederzeit umschaltbar** in den Geräteeigenschaften (Geräte mit kg- und lbs-Anzeige). Alte Sätze bleiben unverändert, weil jeder Satz seine eigene Eingabeeinheit speichert. Die Einheit des Geräts gilt nur als Vorgabe für neue Sätze.
 - **[Änderung M0] Anzeige letzter Werte (abgestimmt):** immer beide Einheiten, „xx kg, yy lbs“ – unabhängig von der Geräteeinheit.

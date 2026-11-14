@@ -6,4 +6,4 @@
 /// Installation, sonst lässt sich die App nicht „drüber“ installieren.
 library;
 
-const appVersion = '0.2.5';
+const appVersion = '0.2.6';
