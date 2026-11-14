@@ -4,6 +4,7 @@ Begriffe, wie sie in App, Doku und Code verwendet werden. Neue Begriffe werden l
 
 | Begriff | Bedeutung |
 |---|---|
+| **Gymi** | Name der Trainings-App (gesprochen wie „Jimmy“), seit 14.11.2026. Nur Anzeigename; die interne Android-Kennung `com.sutma90.trainingsapp` bleibt. |
 | **Standort** | Studio, in dem trainiert wird (z. B. Dielsdorf, Grüze). Eigene Tabelle, erweiterbar. |
 | **Gerät** | Eine Übung an einem Standort, eindeutig über Standort + Kürzel. Ein physisches Gerät mit zwei Übungen sind zwei Geräte (R2.2). |
 | **Kürzel** | Kurzname eines Geräts am Standort, z. B. `A4`. Gleiches Kürzel an anderem Standort = anderes Gerät. |

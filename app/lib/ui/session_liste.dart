@@ -73,7 +73,7 @@ class _SessionListeState extends State<SessionListe>
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('Training')),
+      appBar: AppBar(title: const Text('Gymi')),
       body: Column(
         children: [
           StreamBuilder<LaufendeSession?>(

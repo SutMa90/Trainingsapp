@@ -3,6 +3,7 @@
 Stand: 13.11.2026 · Status: **M0 und M1 abgeschlossen – M2 (Erfassung) läuft, siehe `docs/M2.md`**
 
 ## Rahmen [Änderung M0]
+- **[Änderung M2] Name:** Die App heisst **Gymi** (gesprochen wie „Jimmy“, Nutzerentscheid 14.11.2026). Nur der Anzeigename ändert sich; die Android-Kennung `com.sutma90.trainingsapp`, der Datenbankname und die Ordner-/Repository-Namen bleiben – eine neue Kennung wäre für Android eine andere App, die Daten wären weg.
 - **Tech-Stack:** Flutter (Android), lokale SQLite-Datenbank, VS Code, GitHub-Repository – analog Bierbrau-App.
 - **Werkzeuge:** Claude Code für Code, Build und Git; Cowork für Doku und Konzept.
 - **Führende Quelle:** Sobald das Repository steht, wandern ROADMAP und Backlog nach `docs/` im Repository. Der Ordner bleibt nur Arbeitskopie.
