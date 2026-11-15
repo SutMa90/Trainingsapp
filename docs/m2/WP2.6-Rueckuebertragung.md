@@ -54,3 +54,43 @@ Datum (Text `JJJJ-MM-TT`), Ort, Gerät (Kürzel; bei links/rechts `C3-links` / `
 - Umsetzung in Dart neben dem Umwandlungsskript (`app/tool/`), nutzt dieselben Tabellen und denselben Excel-Leser.
 - Ordner `Sicherungen/` neben der Excel, zusätzlich ausdrücklich in `.gitignore`.
 - Reihenfolge: zuerst nur mit `testdaten/`, erst danach mit der echten Excel (WP2.7).
+
+## [Änderung M2] Umsetzung (15.11.2026)
+
+### Bedienung (Probelauf, WP2.6)
+1. Am Handy eine Session beenden (nur beendete Sessions werden übertragen); Gymi danach ganz schliessen.
+2. Handy per USB verbinden und entsperren.
+3. Im Projektordner **`Rueckuebertragung_Probe.bat`** doppelklicken.
+4. Das Fenster zeigt die Vorschau; **J** + Enter überträgt, alles andere bricht ab.
+5. Ergebnis: Kopie `Sicherungen/Probe/Krafttraining_Log_Probe_JJJJ-MM-TT.xlsx`, dazu Sicherungen und Bericht im selben Ordner. Die echte Excel bleibt unverändert.
+- Die Doppelklick-Datei für die echte Excel (`Rueckuebertragung.bat`) folgt mit WP2.7.
+
+### Abbrüche (immer mit Grund und „Was tun“, Excel unverändert)
+Excel nicht gefunden · Excel in Excel geöffnet (auch kurz vor dem Schreiben nochmals geprüft) · adb fehlt · kein Handy / Zugriff nicht erlaubt / offline / mehrere Geräte · Gymi-Datenbank fehlt oder Gymi schreibt gerade · Kopie unvollständig oder beschädigt · Datenbank-Version passt nicht · Excel nicht lesbar oder ohne die nötigen Spalten · gemeinsame Excel-Formel in einer vorbereiteten Zeile · Prüfung nach dem Schreiben findet Unterschiede · Antwort nicht „J“. Unerwartete Fehler: Text an Claude weitergeben.
+
+### Kleinere technische Entscheide (Vorschlag, umgesetzt)
+- **Nur App-Sessions werden verglichen.** Importierte Sessions („imp“) stammen aus der Excel und werden übersprungen (der Import fasst z. B. A4.1 und A4 zusammen – ein Vergleich würde sonst überall „abweichend“ melden).
+- **„Abweichend“** = gleiche Session (Datum + Ort) in der Excel, aber andere Sätze (Gerät, Satz-Nr., Einheit, Wdh, kg).
+- **Neue Geräte:** alle Geräte der App, deren Standort + Kürzel im Tab Geräte fehlt – auch ohne Sätze.
+- **Geräte nur in der App geändert:** Funktion, Hersteller, Modell, Vorgabe-Einheit, Einstellungen, assistiert; Muskelgruppe nur, wo die Excel in Spalte K schon eine hat.
+- **Schreiben:** Text in den Tabellenblättern wird direkt eingesetzt (Zellen als Text, wie die bisherige Datei); kg/lbs mit 2 Stellen, Eingabe in ihrer Einheit fett, umgerechneter Wert grau kursiv (Formatierung von der letzten kg-Zeile übernommen); Volumen als Formel mit Wert.
+- **Sicher ersetzen:** neue Datei zuerst als `….xlsx.neu`, prüfen (alle bisherigen Werte gleich, Anzahl neuer Zeilen stimmt), dann erst ersetzen.
+- **Handy-Kopie:** zuerst in einen Arbeitsordner, Prüfung auf Vollständigkeit und Datenbank-Version, bevor sie geöffnet wird; die Sicherung in `Sicherungen/` bleibt unverändert.
+- Umwandlungsskript: Spalte „Muskelgruppe“ hat Vorrang vor der Entscheidungsdatei; unbekannte Muskelgruppen werden angelegt; „links/rechts getrennt“ in der Geräte-Notiz markiert das Gerät. Mit der echten Excel weiterhin 276 Sätze, 13 Sessions, 31 Geräte, 0 Fehler.
+- **App 0.2.9:** Bei assistierten Geräten zeigt das Erfassungsfenster „effektiv = 176,37 − 66,1 lbs = 50,02 kg, 110,27 lbs“ (Körpergewicht in der Eingabeeinheit, Ergebnis in beiden Einheiten).
+
+### Aufbau
+| Datei | Inhalt |
+|---|---|
+| `Rueckuebertragung_Probe.bat` | Doppelklick, Probelauf auf einer Kopie |
+| `app/tool/rueckuebertragung/main.dart` | Ablauf: Handy-Kopie, Sicherungen, Vorschau, J/N, Schreiben, Bericht, Abbrüche |
+| `app/tool/rueckuebertragung/abgleich.dart` | Was ist neu, schon da, abweichend; Zeilen im Excel-Format |
+| `app/tool/rueckuebertragung/xlsx_schreiber.dart` | Zeilen einsetzen, Spalte K, Prüfung nach dem Schreiben |
+| `app/tool/rueckuebertragung/dateien.dart` | Dateinamen der Sicherungen (nie überschreiben) |
+| `app/tool/import_excel/…` | liest Spalte K, assistiert in lbs, L/R aus Geräte-Notiz |
+| `app/test/rueckuebertragung_test.dart` | Abnahmetest mit `testdaten/` (7 Tests) |
+
+### Ergebnis
+- `flutter test`: 77 von 77 grün; `flutter analyze`: keine Befunde. Abnahmetest: 2 Sessions (lbs, assistiert kg + lbs, L/R, neues Gerät mit neuer Muskelgruppe, Notizen) → bestehende Zeilen byte-gleich, übrige Teile der Datei gleich, vorbereitete Zeilen gefüllt, erneuter Import = dieselben Sätze wie in der App (inkl. Körpergewicht), 2. Lauf ergänzt nichts, spätere Korrektur nur gemeldet.
+- Am PC geprüft: Probelauf mit dem Handy (nichts zu übertragen), Schreiblauf mit Testdaten inkl. Sicherung, 2. Lauf, Abbruch bei geöffneter Excel.
+- Probelauf durch den Nutzer: offen.
