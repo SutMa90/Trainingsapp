@@ -1,6 +1,6 @@
 # WP2.7 – Umstieg: App wird die Quelle
 
-Stand: 15.11.2026 · Status: 🔄 Abnahmekriterium erfüllt, Blick des Nutzers aufs Handy offen
+Stand: 15.11.2026 · Status: ✅ abgenommen (0.2.10)
 
 **Abnahmekriterium:** Sessions/Sätze in der App = Excel; Probelauf der Rückübertragung auf der echten Excel meldet 0 neue Sessions, Datei unverändert.
 
@@ -44,3 +44,4 @@ Umsetzung (Vorschlag): Die Entscheidungsdatei hat neu „muskelgruppeVorschlag�
 - **Zählung App = Excel:** 13 Sessions (alle beendet, alle „imp“), 276 Sätze, 31 Geräte, letzte Session 11.11. ✅
 - **Probelauf** mit `Rueckuebertragung.bat` auf der echten Excel: „Neue Sessions: keine … Nichts zu übertragen“; Prüfsumme (SHA-256) und Änderungszeit der Excel vorher = nachher. ✅
 - **Ab jetzt:** Gymi ist die Quelle. **Nie mehr deinstallieren**, nur „drüber“ installieren. Nach dem Training: Handy einstecken, `Rueckuebertragung.bat` doppelklicken, J.
+- **Nutzer am Handy (15.11.):** Name/Version, 13 Sessions bis 11.11., Vorschläge T1/T2/C3 sichtbar – „Handy passt“. ✅ WP2.7 abgenommen.
