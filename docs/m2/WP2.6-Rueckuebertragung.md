@@ -1,6 +1,6 @@
 # WP2.6 – Rückübertragung App → Excel (Backlog I-21)
 
-Stand: 15.11.2026 · Status: 🔄 in Umsetzung (zweite Fragenrunde 15.11. entschieden)
+Stand: 15.11.2026 · Status: ✅ abgenommen (0.2.9, Probelauf auf einer Kopie)
 
 **Zweck:** Datensicherung, solange die App die Quelle ist – falls die App Daten aus unbekannten Gründen nicht behält. Abgrenzung: allgemeiner Export bleibt I-15 (V2).
 
@@ -93,4 +93,5 @@ Excel nicht gefunden · Excel in Excel geöffnet (auch kurz vor dem Schreiben no
 ### Ergebnis
 - `flutter test`: 77 von 77 grün; `flutter analyze`: keine Befunde. Abnahmetest: 2 Sessions (lbs, assistiert kg + lbs, L/R, neues Gerät mit neuer Muskelgruppe, Notizen) → bestehende Zeilen byte-gleich, übrige Teile der Datei gleich, vorbereitete Zeilen gefüllt, erneuter Import = dieselben Sätze wie in der App (inkl. Körpergewicht), 2. Lauf ergänzt nichts, spätere Korrektur nur gemeldet.
 - Am PC geprüft: Probelauf mit dem Handy (nichts zu übertragen), Schreiblauf mit Testdaten inkl. Sicherung, 2. Lauf, Abbruch bei geöffneter Excel.
-- Probelauf durch den Nutzer: offen.
+- Probelauf durch den Nutzer (15.11., App 0.2.9): Test-Session am Handy erfasst, Doppelklick → Vorschau 1 Session mit 12 Sätzen und 1 neues Gerät → „J“ → Kopie in Excel geprüft; Nutzer: „Probelauf passt“. ✅
+- Gegenprobe: Die Probe-Kopie lässt sich wieder importieren – 288 Sätze (276 + 12), 14 Sessions, 32 Geräte, 0 Fehler.
