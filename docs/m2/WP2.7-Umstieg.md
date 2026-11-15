@@ -1,6 +1,6 @@
 # WP2.7 – Umstieg: App wird die Quelle
 
-Stand: 15.11.2026 · Status: 🔄 in Umsetzung (Fragenrunde 15.11. entschieden)
+Stand: 15.11.2026 · Status: 🔄 Abnahmekriterium erfüllt, Blick des Nutzers aufs Handy offen
 
 **Abnahmekriterium:** Sessions/Sätze in der App = Excel; Probelauf der Rückübertragung auf der echten Excel meldet 0 neue Sessions, Datei unverändert.
 
@@ -36,3 +36,11 @@ Umsetzung (Vorschlag): Die Entscheidungsdatei hat neu „muskelgruppeVorschlag�
 5. **Ab dann:** Die App ist die Quelle, die Excel wird nur noch per Rückübertragung ergänzt. **App nie mehr deinstallieren** (löscht die Datenbank), Updates nur „drüber“ installieren.
    Fällt die App im Gym aus: Session wie früher in die Excel eintragen; die Rückübertragung erkennt Datum + Ort und legt nichts doppelt an.
 6. Erste echte Gym-Session mit Rückübertragung = Abnahme M2 (WP2.8).
+
+## [Änderung M2] Durchführung (15.11.2026)
+- **Startdatenbank** neu aus `Krafttraining_Log.xlsx` (letzte Session 11.11.): 276 von 276 Sätzen, 13 Sessions, 31 Geräte, 0 Fehler, 20 Warnungen (wie M1). Vorschläge T1/T2/C3 markiert.
+- **App 0.2.10:** Vorschlag in der Geräteliste („Rücken (Vorschlag)“) und im Formular mit „Bestätigen“; die Marke steht in der Geräte-Notiz und wird nicht angezeigt (Oberflächentest). 80 von 80 Tests grün.
+- **Handy:** Sicherung `Sicherungen/App-Datenbank_Stand_2026-11-15_vor-Umstieg.sqlite` (enthält die Test-Session vom Probelauf, geprüft lesbar) → **letzte Deinstallation** (Nutzer-OK) → Neuinstallation 0.2.10 → Gymi übernimmt die Startdatenbank.
+- **Zählung App = Excel:** 13 Sessions (alle beendet, alle „imp“), 276 Sätze, 31 Geräte, letzte Session 11.11. ✅
+- **Probelauf** mit `Rueckuebertragung.bat` auf der echten Excel: „Neue Sessions: keine … Nichts zu übertragen“; Prüfsumme (SHA-256) und Änderungszeit der Excel vorher = nachher. ✅
+- **Ab jetzt:** Gymi ist die Quelle. **Nie mehr deinstallieren**, nur „drüber“ installieren. Nach dem Training: Handy einstecken, `Rueckuebertragung.bat` doppelklicken, J.
