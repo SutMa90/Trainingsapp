@@ -1,6 +1,6 @@
 # WP2.6 – Rückübertragung App → Excel (Backlog I-21)
 
-Stand: 13.11.2026 · Status: Weg und Format freigegeben, Umsetzung offen
+Stand: 15.11.2026 · Status: 🔄 in Umsetzung (zweite Fragenrunde 15.11. entschieden)
 
 **Zweck:** Datensicherung, solange die App die Quelle ist – falls die App Daten aus unbekannten Gründen nicht behält. Abgrenzung: allgemeiner Export bleibt I-15 (V2).
 
@@ -17,6 +17,16 @@ Stand: 13.11.2026 · Status: Weg und Format freigegeben, Umsetzung offen
 | 5 | Prio | **soll** (Nutzer, 13.11.2026) |
 | 6 | Welche Sessions | nur **beendete** Sessions (siehe `DATENMODELL.md` R1.4 [Änderung M2]); eine laufende Session wird im Bericht als „läuft noch“ gemeldet |
 
+## [Änderung M2] Entscheidungen des Nutzers (15.11.2026, zweite Fragenrunde)
+| # | Punkt | Entscheid |
+|---|---|---|
+| 7 | Abnahme | automatische Tests mit `testdaten/` **und** Probelauf am PC mit dem Handy: Doppelklick schreibt nur in eine **Kopie** der echten Excel (`Sicherungen/Probe/`), der Nutzer prüft die Kopie in Excel. Die echte Excel bleibt bis WP2.7 unberührt. Test-Session und Testgeräte hat der Nutzer am Handy gelöscht. |
+| 8 | Muskelgruppe | **[Änderung M2] Excel-Format:** Tab Geräte bekommt die Spalte **K „Muskelgruppe“**. Die Rückübertragung füllt sie bei neuen Geräten; das Umwandlungsskript liest sie (vor der Zuordnung über die Entscheidungsdatei). Mehrere Haupt- und Hilfsmuskelgruppen pro Gerät → Backlog I-24. |
+| 9 | Assistiert in lbs | **bleibt erlaubt.** Das Körpergewicht wird im Hintergrund in die Eingabeeinheit umgerechnet, die Unterstützung abgezogen; das effektive Trainingsgewicht steht in beiden Einheiten (Spalten E und F). Die Auto-Notiz nennt die Einheit der Eingabe, das Umwandlungsskript liest beides. |
+| 10 | Notizen | Auto-Notiz zuerst, eigene Notiz danach, getrennt mit „; “ (z. B. „Eingabe: 70 lbs; Sitz 4“) |
+| 11 | Neue Geräte im Tab Geräte | Spalten wie bisher + K; assistiert → Notiz „assistiertes Gerät - Gewicht = Körpergewicht minus Eingabewert“, links/rechts → Notiz „links/rechts getrennt“; bestehende Geräte unverändert |
+| 12 | Bericht | im Fenster und als Datei `Sicherungen/Rueckuebertragung_JJJJ-MM-TT.txt` (nie im Repository); nennt auch Geräte, die nur in der App geändert wurden. **Jeder Abbruch erklärt, warum, und was zu tun ist**; das Fenster bleibt offen, bis eine Taste gedrückt wird. |
+
 ## Ablauf (Weg A)
 1. Handy per USB verbunden und entsperrt; am PC `Rueckuebertragung.bat` doppelklicken.
 2. Das Skript holt eine **Kopie der App-Datenbank** vom Handy (adb, Debug-Version) und legt sie lokal ab – selbst schon eine vollständige Sicherung. Nie im Repository.
@@ -28,6 +38,8 @@ Stand: 13.11.2026 · Status: Weg und Format freigegeben, Umsetzung offen
 Datum (Text `JJJJ-MM-TT`), Ort, Gerät (Kürzel; bei links/rechts `C3-links` / `C3-rechts`), Satz-Nr., Gewicht (kg), Gewicht (lbs), Einheit (Eingabe), Wiederholungen, Volumen (Formel `E*H`), RPE (leer), Notiz.
 - Eingabe fett, berechneter Wert grau kursiv – wie bisher.
 - Auto-Notizen wie bisher: „Eingabe: 70 lbs“ bei lbs-Eingaben, „assistiert: KG - X kg Eingabe“ bei assistierten Geräten. So bleibt die Excel jederzeit wieder importierbar.
+- **[Änderung M2] 15.11.:** Assistiert mit lbs-Eingabe: „assistiert: 80 kg - 20 lbs Eingabe“ (Körpergewicht immer in kg, Eingabe mit ihrer Einheit); E/F = effektives Gewicht in kg/lbs, G = lbs, F fett. Die bisherige Form „assistiert: 80 - 40 kg Eingabe“ gilt weiter.
+- **[Änderung M2] 15.11.:** Tab Geräte, Spalte K „Muskelgruppe“ (Überschrift fett wie die anderen). Bestehende Geräte bekommen keinen Eintrag in K (bestehende Zeilen bleiben unverändert); einzige Änderung an einer bestehenden Zeile ist die neue Überschrift K1.
 - Geänderte Geräteangaben (z. B. Datenpflege I-19) werden **nicht** zurückgeschrieben – bestehende Zeilen bleiben unverändert.
 
 ## Erkennung bereits übertragener Sessions
