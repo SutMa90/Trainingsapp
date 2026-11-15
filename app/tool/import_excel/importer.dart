@@ -14,6 +14,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:trainingsapp/data/db/datenbank.dart';
+import 'package:trainingsapp/data/db/geraete_logik.dart' show GeraeteLogik;
 
 import 'xlsx_leser.dart';
 
@@ -207,13 +208,18 @@ class _GeraetRoh {
     required this.einheit,
     required this.einstellungen,
     required this.notiz,
+    this.muskelgruppe,
   });
   final int zeile;
   final String standort, kuerzel;
   final String? funktion, hersteller, modell, notiz;
+
+  /// [Änderung M2] Spalte K „Muskelgruppe“ (von der Rückübertragung, WP2.6).
+  final String? muskelgruppe;
   final Einheit einheit;
   final List<String?> einstellungen;
-  bool linksRechts = false;
+  late bool linksRechts =
+      (notiz ?? '').toLowerCase().contains('links/rechts getrennt');
   int? id;
   String? zusatzNotiz;
 
@@ -287,8 +293,10 @@ String? _datum(Object? v) {
 }
 
 final _reEingabe = RegExp(r'^Eingabe:\s*([\d.,]+)\s*(kg|lbs)$');
-final _reAssistiert =
-    RegExp(r'^assistiert:\s*([\d.,]+)\s*-\s*([\d.,]+)\s*kg Eingabe$');
+/// „assistiert: 80 - 40 kg Eingabe“; [Änderung M2] auch
+/// „assistiert: 80 kg - 20 lbs Eingabe“ (Körpergewicht immer kg).
+final _reAssistiert = RegExp(
+    r'^assistiert:\s*([\d.,]+)(?:\s*kg)?\s*-\s*([\d.,]+)\s*(kg|lbs) Eingabe$');
 final _reGleichesGeraet = RegExp(r'^gleiches Gerät wie\s+\S+$');
 final _reSeite = RegExp(r'^(.+)-(links|rechts)$');
 final _reZusatzKuerzel = RegExp(r'^(.+)\.(\d+)$');
@@ -345,6 +353,7 @@ Future<ImportErgebnis> importiere({
         _text(z['Einstellung 3']),
       ],
       notiz: _text(z['Notiz']),
+      muskelgruppe: gSp.containsKey('Muskelgruppe') ? _text(z['Muskelgruppe']) : null,
     );
     if (geraete.containsKey(g.schluessel)) {
       melde(Stufe.fehler,
@@ -413,9 +422,19 @@ Future<ImportErgebnis> importiere({
   final gruppen = {
     for (final g in await db.select(db.muskelgruppen).get()) g.name: g.id,
   };
+  // [Änderung M2] Muskelgruppen aus Spalte K, die es noch nicht gibt (in der
+  // App ergänzt, R2.4), werden ans Ende der Liste angelegt.
+  for (final g in geraete.values) {
+    final name = g.muskelgruppe;
+    if (name == null || gruppen.containsKey(name)) continue;
+    gruppen[name] = await db.legeMuskelgruppeAn(name);
+    melde(Stufe.info, '${g.schluessel}: Muskelgruppe „$name“ neu angelegt');
+  }
   int? gruppeFuer(_GeraetRoh g) {
     String? name;
-    if (g.funktion != null) {
+    if (g.muskelgruppe != null) {
+      name = g.muskelgruppe;
+    } else if (g.funktion != null) {
       name = entscheidungen.muskelgruppeNachFunktion[g.funktion];
       if (name == null) {
         melde(Stufe.warnung,
@@ -514,6 +533,7 @@ Future<ImportErgebnis> importiere({
     double? notizEingabe;
     Einheit? notizEinheit;
     double? assistKw, assistEingabe;
+    Einheit? assistEinheit;
     for (final teil in (_text(z['Notiz']) ?? '').split(';')) {
       final t = teil.trim();
       if (t.isEmpty) continue;
@@ -525,6 +545,7 @@ Future<ImportErgebnis> importiere({
       } else if (mA != null) {
         assistKw = _komma(mA[1]!);
         assistEingabe = _komma(mA[2]!);
+        assistEinheit = _einheit(mA[3]);
       } else if (_reGleichesGeraet.hasMatch(t)) {
         // Geräte-Information, steht im Tab Geräte
       } else {
@@ -540,8 +561,10 @@ Future<ImportErgebnis> importiere({
             '„assistiert: Körpergewicht - Eingabe kg Eingabe“ fehlt');
         continue;
       }
-      if (einheit != Einheit.kg) {
-        fehlerS('assistiertes Gerät ${geraet.kuerzel}: Eingabe nicht in kg');
+      // [Änderung M2] Eingabe in kg oder lbs; Einheit der Notiz = Spalte G
+      if (assistEinheit != einheit) {
+        fehlerS('assistiertes Gerät ${geraet.kuerzel}: Einheit der Notiz '
+            '(${assistEinheit?.name}) passt nicht zur Spalte Einheit (${einheit.name})');
         continue;
       }
       eingabewert = assistEingabe;
