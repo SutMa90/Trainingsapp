@@ -15,8 +15,12 @@ class XlsxMappe {
   /// Blattname → Zeilennummer (1-basiert, wie in Excel) → Spalte (0 = A) → Wert.
   final Map<String, Map<int, Map<int, Object>>> blaetter;
 
-  static XlsxMappe lies(String pfad) {
-    final archiv = ZipDecoder().decodeBytes(File(pfad).readAsBytesSync());
+  static XlsxMappe lies(String pfad) =>
+      ausBytes(File(pfad).readAsBytesSync(), pfad: pfad);
+
+  /// [Änderung M2] auch direkt aus den Bytes (Rückübertragung, WP2.6).
+  static XlsxMappe ausBytes(List<int> bytes, {String pfad = 'Excel-Datei'}) {
+    final archiv = ZipDecoder().decodeBytes(bytes);
 
     String utf8Text(String name) {
       final f = archiv.findFile(name);

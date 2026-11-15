@@ -275,7 +275,8 @@ Einheit? _einheit(Object? v) => switch (_text(v)?.toLowerCase()) {
       _ => null,
     };
 
-String? _datum(Object? v) {
+/// Datum aus einer Excel-Zelle: Text JJJJ-MM-TT oder Excel-Seriennummer.
+String? excelDatum(Object? v) {
   if (v is num) {
     // Excel-Seriennummer → Datum (eindeutig)
     final d = DateTime.utc(1899, 12, 30).add(Duration(days: v.floor()));
@@ -474,7 +475,7 @@ Future<ImportErgebnis> importiere({
     void fehler(String t) => melde(Stufe.fehler, t, zeile: z.nr);
 
     final ort = _text(ortRoh);
-    final datum = _datum(datumRoh);
+    final datum = excelDatum(datumRoh);
     if (datum == null) {
       fehler('Datum „${_text(datumRoh) ?? ''}“ nicht eindeutig lesbar '
           '(erwartet JJJJ-MM-TT)');
