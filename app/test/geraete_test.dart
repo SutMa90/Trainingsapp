@@ -139,6 +139,16 @@ void main() {
     expect(v.modelleVon(null), isEmpty);
   });
 
+  test('WP2.7: Marke für vorgeschlagene Muskelgruppe in der Notiz', () {
+    expect(notizMitMarke(null), markeMuskelgruppeVorschlag);
+    expect(notizMitMarke(''), markeMuskelgruppeVorschlag);
+    expect(notizMitMarke('assistiert'), 'assistiert | $markeMuskelgruppeVorschlag');
+    expect(notizMitMarke(notizMitMarke('a')), 'a | $markeMuskelgruppeVorschlag');
+    expect(notizOhneMarke('assistiert | $markeMuskelgruppeVorschlag'), 'assistiert');
+    expect(notizOhneMarke(markeMuskelgruppeVorschlag), isNull);
+    expect(notizOhneMarke(null), isNull);
+  });
+
   test('Muskelgruppe ergänzen: ans Ende, keine Doppelten', () async {
     final vorher = await db.muskelgruppenListe();
     expect(vorher.map((m) => m.name), startMuskelgruppen);

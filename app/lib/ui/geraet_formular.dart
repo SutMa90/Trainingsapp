@@ -64,7 +64,17 @@ class _GeraetFormularState extends State<GeraetFormular> {
   late final _einstellung3 = TextEditingController(
     text: widget.geraet?.einstellung3,
   );
-  late final _notiz = TextEditingController(text: widget.geraet?.notiz);
+
+  /// [Änderung M2] WP2.7: Muskelgruppe ist ein Vorschlag aus dem Import.
+  late bool _vorschlag =
+      widget.geraet != null && istMuskelgruppeVorschlag(widget.geraet!);
+
+  // Die Vorschlags-Marke steht in der Notiz, wird aber nicht angezeigt.
+  late final _notiz = TextEditingController(
+    text: _vorschlag
+        ? notizOhneMarke(widget.geraet!.notiz)
+        : widget.geraet?.notiz,
+  );
   final _herstellerFokus = FocusNode();
   final _modellFokus = FocusNode();
 
@@ -138,6 +148,7 @@ class _GeraetFormularState extends State<GeraetFormular> {
     setState(() {
       _gruppen = gruppen;
       _muskelgruppeId = id;
+      _vorschlag = false;
     });
   }
 
@@ -159,7 +170,7 @@ class _GeraetFormularState extends State<GeraetFormular> {
       einstellung1: _einstellung1.text,
       einstellung2: _einstellung2.text,
       einstellung3: _einstellung3.text,
-      notiz: _notiz.text,
+      notiz: _vorschlag ? notizMitMarke(_notiz.text) : _notiz.text,
     );
     try {
       final int id;
@@ -307,6 +318,30 @@ class _GeraetFormularState extends State<GeraetFormular> {
                   const SizedBox(height: 16),
                   Text('Muskelgruppe', style: text.labelLarge),
                   const SizedBox(height: 6),
+                  // [Änderung M2] WP2.7: Vorschlag aus dem Import bestätigen
+                  if (_vorschlag)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.tertiaryContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Text(
+                              'Vorschlag – bitte bestätigen oder eine andere '
+                              'Muskelgruppe wählen',
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => setState(() => _vorschlag = false),
+                            child: const Text('Bestätigen'),
+                          ),
+                        ],
+                      ),
+                    ),
                   Wrap(
                     spacing: 6,
                     runSpacing: 6,
@@ -315,9 +350,10 @@ class _GeraetFormularState extends State<GeraetFormular> {
                         ChoiceChip(
                           label: Text(m.name),
                           selected: m.id == _muskelgruppeId,
-                          onSelected: (an) => setState(
-                            () => _muskelgruppeId = an ? m.id : null,
-                          ),
+                          onSelected: (an) => setState(() {
+                            _muskelgruppeId = an ? m.id : null;
+                            _vorschlag = false;
+                          }),
                         ),
                       ActionChip(
                         avatar: const Icon(Icons.add, size: 18),

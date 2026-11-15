@@ -14,7 +14,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:trainingsapp/data/db/datenbank.dart';
-import 'package:trainingsapp/data/db/geraete_logik.dart' show GeraeteLogik;
+import 'package:trainingsapp/data/db/geraete_logik.dart' show GeraeteLogik, markeMuskelgruppeVorschlag;
 
 import 'xlsx_leser.dart';
 
@@ -47,6 +47,7 @@ class Entscheidungen {
     required this.muskelgruppeNachFunktion,
     required this.muskelgruppeOhneFunktion,
     required this.stichproben,
+    this.muskelgruppeVorschlag = const {},
   });
 
   final List<Zusammenfuehrung> zusammenfuehren;
@@ -56,6 +57,10 @@ class Entscheidungen {
 
   /// „Standort/Kürzel“ → Muskelgruppe, für Geräte ohne Funktion.
   final Map<String, String> muskelgruppeOhneFunktion;
+
+  /// [Änderung M2] WP2.7: „Standort/Kürzel“ → vorgeschlagene Muskelgruppe für
+  /// Geräte ohne Zuordnung. Wird gesetzt und in der Geräte-Notiz markiert.
+  final Map<String, String> muskelgruppeVorschlag;
 
   /// Sessions „JJJJ-MM-TT Standort“, die der Prüfbericht Satz für Satz zeigt.
   final List<String> stichproben;
@@ -70,6 +75,8 @@ class Entscheidungen {
             Map<String, String>.from(j['muskelgruppeNachFunktion'] as Map? ?? {}),
         muskelgruppeOhneFunktion:
             Map<String, String>.from(j['muskelgruppeOhneFunktion'] as Map? ?? {}),
+        muskelgruppeVorschlag:
+            Map<String, String>.from(j['muskelgruppeVorschlag'] as Map? ?? {}),
         stichproben: List<String>.from(j['stichproben'] as List? ?? []),
       );
 
@@ -222,6 +229,7 @@ class _GeraetRoh {
       (notiz ?? '').toLowerCase().contains('links/rechts getrennt');
   int? id;
   String? zusatzNotiz;
+  bool muskelgruppeVorschlag = false;
 
   bool get assistiert => (notiz ?? '').toLowerCase().contains('assistiert');
   String get schluessel => '$standort/$kuerzel';
@@ -431,19 +439,29 @@ Future<ImportErgebnis> importiere({
     gruppen[name] = await db.legeMuskelgruppeAn(name);
     melde(Stufe.info, '${g.schluessel}: Muskelgruppe „$name“ neu angelegt');
   }
+  String? vorschlag(_GeraetRoh g) {
+    final v = entscheidungen.muskelgruppeVorschlag[g.schluessel];
+    if (v != null) {
+      g.muskelgruppeVorschlag = true;
+      melde(Stufe.info, '${g.schluessel}: Muskelgruppe „$v“ vorgeschlagen (markiert)');
+    }
+    return v;
+  }
+
   int? gruppeFuer(_GeraetRoh g) {
     String? name;
     if (g.muskelgruppe != null) {
       name = g.muskelgruppe;
     } else if (g.funktion != null) {
       name = entscheidungen.muskelgruppeNachFunktion[g.funktion];
+      name ??= vorschlag(g);
       if (name == null) {
         melde(Stufe.warnung,
             '${g.schluessel}: Funktion „${g.funktion}“ hat keine Muskelgruppen-Zuordnung – bleibt leer');
         return null;
       }
     } else {
-      name = entscheidungen.muskelgruppeOhneFunktion[g.schluessel];
+      name = entscheidungen.muskelgruppeOhneFunktion[g.schluessel] ?? vorschlag(g);
       if (name == null) {
         melde(Stufe.info, '${g.schluessel}: keine Funktion – Muskelgruppe bleibt leer');
         return null;
@@ -677,12 +695,17 @@ Future<ImportErgebnis> importiere({
     final geordnet = geraete.values.toList()
       ..sort((a, c) => a.zeile.compareTo(c.zeile));
     for (final g in geordnet) {
-      final notiz = [g.notiz, g.zusatzNotiz].whereType<String>().join(' | ');
+      final muskelgruppeId = gruppeFuer(g);
+      final notiz = [
+        g.notiz,
+        g.zusatzNotiz,
+        if (g.muskelgruppeVorschlag) markeMuskelgruppeVorschlag,
+      ].whereType<String>().join(' | ');
       g.id = await db.into(db.geraete).insert(GeraeteCompanion.insert(
             standortId: standortIds[g.standort]!,
             kuerzel: g.kuerzel,
             funktion: Value(g.funktion),
-            muskelgruppeId: Value(gruppeFuer(g)),
+            muskelgruppeId: Value(muskelgruppeId),
             hersteller: Value(g.hersteller),
             modell: Value(g.modell),
             einheit: g.einheit,

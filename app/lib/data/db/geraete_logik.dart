@@ -72,6 +72,32 @@ class GeraetHatSaetze implements Exception {
   String toString() => meldung;
 }
 
+/// [Änderung M2] WP2.7: Marke in der Geräte-Notiz für eine vorgeschlagene
+/// Muskelgruppe (vom Import gesetzt). Der Nutzer bestätigt oder ändert sie im
+/// Formular; dann verschwindet die Marke. Kein eigenes Feld im Datenmodell.
+const markeMuskelgruppeVorschlag = 'Muskelgruppe ist ein Vorschlag – bitte bestätigen';
+
+/// true, wenn die Muskelgruppe des Geräts nur ein Vorschlag ist.
+bool istMuskelgruppeVorschlag(Geraet g) =>
+    (g.notiz ?? '').contains(markeMuskelgruppeVorschlag);
+
+/// Notiz ohne die Vorschlags-Marke (und ohne übrig gebliebene Trenner).
+String? notizOhneMarke(String? notiz) {
+  if (notiz == null) return null;
+  final teile = notiz
+      .split(RegExp(r'\s*\|\s*'))
+      .map((t) => t.trim())
+      .where((t) => t.isNotEmpty && t != markeMuskelgruppeVorschlag)
+      .toList();
+  return teile.isEmpty ? null : teile.join(' | ');
+}
+
+/// Notiz mit der Vorschlags-Marke am Ende.
+String notizMitMarke(String? notiz) {
+  final ohne = notizOhneMarke(notiz);
+  return ohne == null ? markeMuskelgruppeVorschlag : '$ohne | $markeMuskelgruppeVorschlag';
+}
+
 /// Kürzel wie gespeichert: ohne Leerzeichen aussen, in Grossbuchstaben.
 String normalisiereKuerzel(String k) => k.trim().toUpperCase();
 

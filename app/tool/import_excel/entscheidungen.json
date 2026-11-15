@@ -30,6 +30,12 @@
     "Grüze/B3": "Rücken",
     "Grüze/C1": "Core"
   },
+  "_hinweis_vorschlag": "WP2.7 (15.11.2026): Vorschläge für Geräte ohne Muskelgruppe – in der App markiert, der Nutzer bestätigt oder ändert sie im Training.",
+  "muskelgruppeVorschlag": {
+    "Dielsdorf/T1": "Rücken",
+    "Dielsdorf/T2": "Trizeps",
+    "Grüze/C3": "Rücken"
+  },
   "stichproben": [
     "2026-08-03 Dielsdorf",
     "2026-08-06 Grüze",

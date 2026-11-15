@@ -148,6 +148,15 @@ class _GeraeteListe extends StatelessWidget {
                   children: [
                     e.muskelgruppe == null
                         ? TextSpan(text: 'Muskelgruppe fehlt', style: fehlt)
+                        // [Änderung M2] WP2.7: Vorschlag aus dem Import markiert
+                        : istMuskelgruppeVorschlag(g)
+                        ? TextSpan(
+                            text: '${e.muskelgruppe!.name} (Vorschlag)',
+                            style: TextStyle(
+                              color: farben.tertiary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
                         : TextSpan(text: e.muskelgruppe!.name),
                     TextSpan(text: ' · $eigenschaften'),
                   ],
