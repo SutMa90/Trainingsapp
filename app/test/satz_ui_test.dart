@@ -19,61 +19,100 @@ void main() {
   late int sued, a2, b4, c3, t1, session;
 
   setUpAll(() async {
-    db = Datenbank(DatabaseConnection(NativeDatabase.memory(),
-        closeStreamsSynchronously: true));
+    db = Datenbank(
+      DatabaseConnection(
+        NativeDatabase.memory(),
+        closeStreamsSynchronously: true,
+      ),
+    );
     sued = await db.legeStandortAn('Südstadt');
-    Future<int> geraet(String k, Einheit e, String f,
-            {bool assistiert = false, bool lr = false}) =>
-        db.into(db.geraete).insert(GeraeteCompanion.insert(
+    Future<int> geraet(
+      String k,
+      Einheit e,
+      String f, {
+      bool assistiert = false,
+      bool lr = false,
+    }) => db
+        .into(db.geraete)
+        .insert(
+          GeraeteCompanion.insert(
             standortId: sued,
             kuerzel: k,
             funktion: Value(f),
             einheit: e,
             assistiert: Value(assistiert),
-            linksRechtsGetrennt: Value(lr)));
+            linksRechtsGetrennt: Value(lr),
+          ),
+        );
     a2 = await geraet('A2', Einheit.lbs, 'Leg Press');
     c3 = await geraet('C3', Einheit.lbs, 'Hip Abduction einarmig', lr: true);
     t1 = await geraet('T1', Einheit.kg, 'Klimmzug', assistiert: true);
     // Letzte Session: A2 15 × 200 lbs
-    final alt = await db.into(db.sessions).insert(
-        SessionsCompanion.insert(datum: '2026-11-10', standortId: sued));
-    await db.into(db.saetze).insert(SaetzeCompanion.insert(
-        sessionId: alt,
-        geraetId: a2,
-        satzNr: 1,
-        wiederholungen: 15,
-        eingabewert: 200,
-        eingabeeinheit: Einheit.lbs,
-        gewichtKg: inKg(200, Einheit.lbs)));
+    final alt = await db
+        .into(db.sessions)
+        .insert(
+          SessionsCompanion.insert(datum: '2026-11-10', standortId: sued),
+        );
+    await db
+        .into(db.saetze)
+        .insert(
+          SaetzeCompanion.insert(
+            sessionId: alt,
+            geraetId: a2,
+            satzNr: 1,
+            wiederholungen: 15,
+            eingabewert: 200,
+            eingabeeinheit: Einheit.lbs,
+            gewichtKg: inKg(200, Einheit.lbs),
+          ),
+        );
     // WP2.3: B4 mit zwei Sätzen letztes Mal (für „wie letztes Mal“)
     b4 = await geraet('B4', Einheit.kg, 'Row');
     for (final (nr, wdh, kg) in [(1, 15, 41.0), (2, 20, 45.0)]) {
-      await db.into(db.saetze).insert(SaetzeCompanion.insert(
-          sessionId: alt,
-          geraetId: b4,
-          satzNr: nr,
-          wiederholungen: wdh,
-          eingabewert: kg,
-          eingabeeinheit: Einheit.kg,
-          gewichtKg: kg));
+      await db
+          .into(db.saetze)
+          .insert(
+            SaetzeCompanion.insert(
+              sessionId: alt,
+              geraetId: b4,
+              satzNr: nr,
+              wiederholungen: wdh,
+              eingabewert: kg,
+              eingabeeinheit: Einheit.kg,
+              gewichtKg: kg,
+            ),
+          );
     }
     // WP2.3: Leg Press am anderen Standort, neuer als A2 hier
     final nord = await db.legeStandortAn('Nordstadt');
-    final l1 = await db.into(db.geraete).insert(GeraeteCompanion.insert(
-        standortId: nord,
-        kuerzel: 'L1',
-        funktion: const Value('Leg Press'),
-        einheit: Einheit.kg));
-    final dort = await db.into(db.sessions).insert(
-        SessionsCompanion.insert(datum: '2026-11-12', standortId: nord));
-    await db.into(db.saetze).insert(SaetzeCompanion.insert(
-        sessionId: dort,
-        geraetId: l1,
-        satzNr: 1,
-        wiederholungen: 12,
-        eingabewert: 95,
-        eingabeeinheit: Einheit.kg,
-        gewichtKg: 95));
+    final l1 = await db
+        .into(db.geraete)
+        .insert(
+          GeraeteCompanion.insert(
+            standortId: nord,
+            kuerzel: 'L1',
+            funktion: const Value('Leg Press'),
+            einheit: Einheit.kg,
+          ),
+        );
+    final dort = await db
+        .into(db.sessions)
+        .insert(
+          SessionsCompanion.insert(datum: '2026-11-12', standortId: nord),
+        );
+    await db
+        .into(db.saetze)
+        .insert(
+          SaetzeCompanion.insert(
+            sessionId: dort,
+            geraetId: l1,
+            satzNr: 1,
+            wiederholungen: 12,
+            eingabewert: 95,
+            eingabeeinheit: Einheit.kg,
+            gewichtKg: 95,
+          ),
+        );
     // Laufende Session ohne Körpergewicht
     session = await db.starteSession(standortId: sued, heute: '2026-11-13');
   });
@@ -93,26 +132,36 @@ void main() {
     void speicherknopfSichtbar() {
       final knopf = find
           .ancestor(
-              of: find.text('Satz speichern'),
-              matching: find.byWidgetPredicate((w) => w is ButtonStyleButton))
+            of: find.text('Satz speichern'),
+            matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+          )
           .first;
-      expect(tester.getRect(knopf).bottom, lessThanOrEqualTo(780 - 48),
-          reason: 'Speicherknopf darf nicht unter den Android-Tasten liegen');
+      expect(
+        tester.getRect(knopf).bottom,
+        lessThanOrEqualTo(780 - 48),
+        reason: 'Speicherknopf darf nicht unter den Android-Tasten liegen',
+      );
     }
 
     Future<void> warte() async {
       for (var i = 0; i < 6; i++) {
         await tester.runAsync(
-            () => Future<void>.delayed(const Duration(milliseconds: 50)));
+          () => Future<void>.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pump(const Duration(milliseconds: 300));
       }
     }
 
-    Future<List<Satz>> saetzeVon(int geraet) async =>
-        (await tester.runAsync(() => (db.select(db.saetze)
-              ..where((s) => s.sessionId.equals(session) & s.geraetId.equals(geraet))
-              ..orderBy([(s) => OrderingTerm.asc(s.id)]))
-            .get()))!;
+    Future<List<Satz>> saetzeVon(int geraet) async => (await tester.runAsync(
+      () =>
+          (db.select(db.saetze)
+                ..where(
+                  (s) =>
+                      s.sessionId.equals(session) & s.geraetId.equals(geraet),
+                )
+                ..orderBy([(s) => OrderingTerm.asc(s.id)]))
+              .get(),
+    ))!;
 
     Future<void> tippe(Finder f) async {
       await tester.ensureVisible(f);
@@ -131,7 +180,8 @@ void main() {
     }
 
     await tester.pumpWidget(
-        TrainingsApp(db: db, jetzt: () => DateTime(2026, 11, 13, 18)));
+      TrainingsApp(db: db, jetzt: () => DateTime(2026, 11, 13, 18)),
+    );
     await warte();
     // Laufende Session öffnet sich direkt, Kacheln sortiert
     expect(find.text('Südstadt · 13.11.2026'), findsOneWidget);
@@ -145,12 +195,16 @@ void main() {
     expect(feld('Gewicht'), '200');
     expect(find.textContaining('= 90,72 kg, 200 lbs'), findsOneWidget);
     // WP2.3: letzte Werte hier und am anderen Standort (gleiche Funktion, neuer)
-    expect(find.text('Letztes Mal hier: 10.11.2026 (vor 3 Tagen)'),
-        findsOneWidget);
+    expect(
+      find.text('Letztes Mal hier: 10.11.2026 (vor 3 Tagen)'),
+      findsOneWidget,
+    );
     expect(find.text('Satz 1: 15 × 200 lbs'), findsOneWidget);
     expect(find.textContaining('90,72 kg, 200 lbs'), findsWidgets);
-    expect(find.text('Zuletzt in Nordstadt: 12.11.2026 (gestern) · L1'),
-        findsOneWidget);
+    expect(
+      find.text('Zuletzt in Nordstadt: 12.11.2026 (gestern) · L1'),
+      findsOneWidget,
+    );
     expect(find.text('Satz 1: 12 × 95 kg'), findsOneWidget);
     expect(find.text('Wie letztes Mal (1 Satz)'), findsOneWidget);
 
@@ -173,11 +227,15 @@ void main() {
     expect(find.textContaining('wird neue Vorgabe des Geräts'), findsOneWidget);
     await tippe(find.text('Satz speichern'));
     a2Saetze = await saetzeVon(a2);
-    expect(a2Saetze.map((s) => (s.satzNr, s.wiederholungen, s.eingabewert)),
-        [(1, 15, 200.0), (2, 12, 200.0), (3, 12, 90.7)]);
+    expect(a2Saetze.map((s) => (s.satzNr, s.wiederholungen, s.eingabewert)), [
+      (1, 15, 200.0),
+      (2, 12, 200.0),
+      (3, 12, 90.7),
+    ]);
     expect(a2Saetze.last.eingabeeinheit, Einheit.kg);
-    final a2Neu = await tester.runAsync(() =>
-        (db.select(db.geraete)..where((g) => g.id.equals(a2))).getSingle());
+    final a2Neu = await tester.runAsync(
+      () => (db.select(db.geraete)..where((g) => g.id.equals(a2))).getSingle(),
+    );
     expect(a2Neu!.einheit, Einheit.kg);
     await schliesseFenster();
     expect(find.text('3 ✓'), findsOneWidget);
@@ -201,8 +259,10 @@ void main() {
     expect(find.text('✓ Satz 1 R gespeichert'), findsOneWidget);
     expect(feld('Gewicht'), '40'); // wieder L: letzter Wert links
     final c3Saetze = await saetzeVon(c3);
-    expect(c3Saetze.map((s) => (s.seite, s.satzNr, s.eingabewert)),
-        [(Seite.L, 1, 40.0), (Seite.R, 1, 42.5)]);
+    expect(c3Saetze.map((s) => (s.seite, s.satzNr, s.eingabewert)), [
+      (Seite.L, 1, 40.0),
+      (Seite.R, 1, 42.5),
+    ]);
     await schliesseFenster();
 
     // Assistiert ohne Körpergewicht: Nachfrage, dann gespeichert
@@ -210,17 +270,41 @@ void main() {
     speicherknopfSichtbar();
     expect(find.text('Satz 1 · assistiert'), findsOneWidget);
     await tester.enterText(find.widgetWithText(TextField, 'Wdh'), '8');
-    await tester.enterText(find.widgetWithText(TextField, 'Unterstützung'), '30');
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Unterstützung'),
+      '30',
+    );
     await warte();
     await tippe(find.text('Satz speichern'));
     expect(find.text('Körpergewicht'), findsOneWidget);
     await tester.enterText(
-        find.widgetWithText(TextField, 'Körpergewicht heute (kg)'), '80');
+      find.widgetWithText(TextField, 'Körpergewicht heute (kg)'),
+      '80',
+    );
     await tippe(find.text('Übernehmen'));
     await warte();
     expect(find.text('✓ Satz 1 gespeichert'), findsOneWidget);
     final t1Satz = (await saetzeVon(t1)).single;
     expect(t1Satz.gewichtKg, 50);
+    // [Änderung 0.2.9] effektiv in beiden Einheiten; lbs-Eingabe erlaubt,
+    // Körpergewicht im Hintergrund in lbs umgerechnet
+    expect(
+      find.textContaining('effektiv = 80 − 30 kg = 50 kg, 110,23 lbs'),
+      findsOneWidget,
+    );
+    await tippe(find.text('lbs'));
+    expect(feld('Unterstützung'), '66,1');
+    expect(
+      find.textContaining(
+        'effektiv = 176,37 − 66,1 lbs = 50,02 kg, 110,27 lbs',
+      ),
+      findsOneWidget,
+    );
+    await tippe(find.text('Satz speichern'));
+    final t1lbs = (await saetzeVon(t1)).last;
+    expect(t1lbs.eingabeeinheit, Einheit.lbs);
+    expect(t1lbs.eingabewert, 66.1);
+    expect(t1lbs.gewichtKg, closeTo(80 - 66.1 * 0.4536, 1e-9));
     await schliesseFenster();
 
     await tester.pumpWidget(const SizedBox());
@@ -237,7 +321,8 @@ void main() {
     Future<void> warte() async {
       for (var i = 0; i < 6; i++) {
         await tester.runAsync(
-            () => Future<void>.delayed(const Duration(milliseconds: 50)));
+          () => Future<void>.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pump(const Duration(milliseconds: 300));
       }
     }
@@ -248,14 +333,19 @@ void main() {
       await warte();
     }
 
-    Future<List<Satz>> b4Heute() async =>
-        (await tester.runAsync(() => (db.select(db.saetze)
-              ..where((s) => s.sessionId.equals(session) & s.geraetId.equals(b4))
-              ..orderBy([(s) => OrderingTerm.asc(s.id)]))
-            .get()))!;
+    Future<List<Satz>> b4Heute() async => (await tester.runAsync(
+      () =>
+          (db.select(db.saetze)
+                ..where(
+                  (s) => s.sessionId.equals(session) & s.geraetId.equals(b4),
+                )
+                ..orderBy([(s) => OrderingTerm.asc(s.id)]))
+              .get(),
+    ))!;
 
     await tester.pumpWidget(
-        TrainingsApp(db: db, jetzt: () => DateTime(2026, 11, 13, 19)));
+      TrainingsApp(db: db, jetzt: () => DateTime(2026, 11, 13, 19)),
+    );
     await warte();
     await tippe(find.text('B4'));
     // Vorbefüllung Satz 1 = Satz 1 vom letzten Mal
@@ -266,8 +356,10 @@ void main() {
     expect(find.text('✓ 2 Sätze wie letztes Mal gespeichert'), findsOneWidget);
     expect(find.text('Wie letztes Mal (2 Sätze)'), findsNothing);
     expect(find.text('Satz 3'), findsOneWidget);
-    expect((await b4Heute()).map((s) => (s.satzNr, s.wiederholungen, s.eingabewert)),
-        [(1, 15, 41.0), (2, 20, 45.0)]);
+    expect(
+      (await b4Heute()).map((s) => (s.satzNr, s.wiederholungen, s.eingabewert)),
+      [(1, 15, 41.0), (2, 20, 45.0)],
+    );
 
     await tippe(find.text('Rückgängig'));
     expect(find.text('✓ Rückgängig gemacht'), findsOneWidget);

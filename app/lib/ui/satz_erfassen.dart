@@ -55,6 +55,9 @@ class _SatzErfassenState extends State<SatzErfassen> {
   String? _bestaetigung;
   bool _speichert = false;
 
+  /// Körpergewicht der Session (für die Anzeige „effektiv“ bei assistiert).
+  double? _koerpergewichtKg;
+
   // WP2.3 letzte Werte (F7)
   String? _heuteDatum;
   LetztesMal? _letztesHier;
@@ -88,10 +91,11 @@ class _SatzErfassenState extends State<SatzErfassen> {
       geraet: g,
       seite: _seite,
     );
+    final s = await (db.select(
+      db.sessions,
+    )..where((x) => x.id.equals(widget.sessionId))).getSingle();
+    _koerpergewichtKg = s.koerpergewichtKg;
     if (erstesMal) {
-      final s = await (db.select(
-        db.sessions,
-      )..where((x) => x.id.equals(widget.sessionId))).getSingle();
       _heuteDatum = s.datum;
       _letztesHier = await db.letzteSessionAmGeraet(
         g.id,
@@ -248,9 +252,17 @@ class _SatzErfassenState extends State<SatzErfassen> {
     String? umrechnung;
     if (wert != null) {
       final kg = inKg(wert, _einheit);
-      umrechnung = g.assistiert
-          ? 'Unterstützung – effektiv = Körpergewicht − ${formatZahl(kg)} kg'
-          : '= ${formatZahl(kg)} kg, ${formatZahl(ausKg(kg, Einheit.lbs))} lbs';
+      final kw = _koerpergewichtKg;
+      final e = _einheit.name;
+      // [Änderung 0.2.9] Assistiert: Körpergewicht in der Eingabeeinheit,
+      // effektives Gewicht in beiden Einheiten (Nutzerwunsch 15.11.).
+      umrechnung = !g.assistiert
+          ? '= ${formatZahl(kg)} kg, ${formatZahl(ausKg(kg, Einheit.lbs))} lbs'
+          : kw == null
+          ? 'Unterstützung – effektiv = Körpergewicht − ${formatZahl(wert)} $e'
+          : 'effektiv = ${formatZahl(ausKg(kw, _einheit))} − '
+                '${formatZahl(wert)} $e = ${formatZahl(kw - kg)} kg, '
+                '${formatZahl(ausKg(kw - kg, Einheit.lbs))} lbs';
     }
 
     // [Änderung 0.2.3] Der Speicherknopf hat einen festen Platz am unteren
