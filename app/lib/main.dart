@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'data/db/datenbank.dart';
 import 'data/db/verbindung.dart';
 import 'ui/session_liste.dart';
+import 'ui/tastatur_waechter.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,8 @@ class TrainingsApp extends StatelessWidget {
         brightness: Brightness.dark,
         useMaterial3: true,
       ),
+      // [Änderung 0.2.11] kein hängender Tastaturbereich (siehe Datei)
+      builder: (context, kind) => TastaturWaechter(child: kind!),
       home: SessionListe(db: db, jetzt: jetzt),
     );
   }

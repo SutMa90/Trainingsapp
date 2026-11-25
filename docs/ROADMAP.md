@@ -1,6 +1,6 @@
 # Trainings-App – Roadmap
 
-Stand: 13.11.2026 · Status: **M0 und M1 abgeschlossen – M2 (Erfassung) läuft, siehe `docs/M2.md`**
+Stand: 25.11.2026 · Status: **M0 und M1 abgeschlossen – M2 (Erfassung) läuft, siehe `docs/M2.md`**
 
 ## Rahmen [Änderung M0]
 - **[Änderung M2] Name:** Die App heisst **Gymi** (gesprochen wie „Jimmy“, Nutzerentscheid 14.11.2026). Nur der Anzeigename ändert sich; die Android-Kennung `com.sutma90.trainingsapp`, der Datenbankname und die Ordner-/Repository-Namen bleiben – eine neue Kennung wäre für Android eine andere App, die Daten wären weg.
@@ -11,6 +11,7 @@ Stand: 13.11.2026 · Status: **M0 und M1 abgeschlossen – M2 (Erfassung) läuft
 - **[Änderung M2] Versionierung bis V1:** `0.<Meilenstein>.<Testinstallation>` (z. B. `0.2.1`) – jede Testinstallation bekommt eine neue Nummer, sichtbar in der App; `1.0.0` = Version 1 fertig (Nutzerwunsch 13.11.2026).
 Grundlage: `Trainings-App_Logikzusammenfassung.md`
 Ideen außerhalb von V1: siehe `IDEEN-BACKLOG.md`
+- **[Änderung 18.11.2026] Nach V1 (V1.x):** freie Gewichte (I-26), links + rechts gleichzeitig (I-28), Kachel-Abschnitte (I-29 Stufe 1), ggf. I-30. **V2:** Auswertungen (I-01, I-02, I-04, I-24), Cardio (I-17) und Export (I-15); danach Garmin-Import (I-27). Details im Backlog.
 
 ## Ziel Version 1
 Das Training komplett ohne Chat erfassen und auswerten – schneller als heute und mit den bestehenden Daten.
@@ -41,7 +42,7 @@ Das Training komplett ohne Chat erfassen und auswerten – schneller als heute u
 | M1 ✅ | GitHub-Repository + Flutter-Grundgerüst, Datenbank, Umwandlungsskript Excel → Startdatenbank, Kürzel-Bereinigung | Claude Code | App startet auf dem Handy mit allen alten Log-Zeilen; 5 Stichproben-Sessions stimmen mit der Excel überein → **erfüllt 13.11.2026** |
 | M2 🔄 | Erfassung: Session, Gerätekacheln, Satz-Eingabe, Korrektur, neues Gerät; Rückübertragung in die Excel (I-21) [Änderung M2] | Claude Code | Eine echte Session im Gym ohne Chat erfasst; ein Satz mit Vorbefüllung in ≤ 5 Sekunden; Rückübertragung ergänzt die Session vollständig in der echten Excel [Änderung M2] |
 | M3 | Session-Report (Text + Grafik) [Änderung M0: Export gestrichen] | Claude Code | Report einer echten Session deckt sich inhaltlich mit der bisherigen Chat-Auswertung |
-| M4 | Praxistest 2–3 Wochen, Fehler beheben, Retrospektive | Gym + Code | 6 Sessions ohne Datenverlust und ohne Rückgriff auf den Chat → **V1 fertig** |
+| M4 | Praxistest 2–3 Wochen, Fehler beheben, Retrospektive; [Änderung 18.11.2026] dazu Sicherung teilen aus der App (I-22, muss), Erinnerung an die Sicherung (I-25), Hinweis abweichende Einheit (I-20), ggf. Gerät ausblenden (I-23) und dynamische Kachel-Reihenfolge (I-30) | Gym + Code | 6 Sessions ohne Datenverlust und ohne Rückgriff auf den Chat → **V1 fertig** |
 
 Nach jedem Meilenstein: kurze Retrospektive (gut / holprig + Ursache / Maßnahmen) und Backlog-Durchsicht.
 
