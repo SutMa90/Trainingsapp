@@ -17,3 +17,4 @@ Datenschutz: hier nur Befunde und Entscheidungen, keine Trainingswerte.
   - Tipp neben ein Eingabefeld schliesst die Tastatur; Knöpfe und Felder reagieren wie bisher.
 - **Tests:** `app/test/tastatur_test.dart` (Hintergrund/Rückkehr, Tipp daneben, Knopf weiterhin auslösbar; Handy-Simulation). `flutter test`: 82 von 82 grün, `flutter analyze` ohne Befunde.
 - **Grenze:** Der Fehler entsteht in Android selbst; ob die Korrektur ihn ganz verhindert, zeigt erst der Test am Handy im Training.
+- **Handy 25.11.:** Sicherung `Sicherungen/App-Datenbank_Stand_2026-11-25_vor-0.2.11.sqlite` (geprüft lesbar; Session 22.11. ist bereits per Rückübertragung in der Excel) → 0.2.11 „drüber“ installiert. Prüfung im nächsten Training offen.
